@@ -47,7 +47,7 @@ export function StrikeClient({ locale: _locale }: StrikeClientProps) {
   const [arsenalTools, setArsenalTools] = useState<ArsenalTool[]>([]);
   const [weaponQuery, setWeaponQuery] = useState('');
   const [weaponResults, setWeaponResults] = useState<{ tool: ArsenalTool; score: number; reasoning: string }[]>([]);
-  const [lastResult, setLastResult] = useState<{ vulnId: string; stripeLink: string; kinks: number } | null>(null);
+  const [lastResult, setLastResult] = useState<{ vulnId: string; stripeLink: string; findings: number } | null>(null);
 
   const loadData = useCallback(async () => {
     const [logsData, budgetData, bountiesData, toolsData] = await Promise.all([
@@ -100,7 +100,7 @@ export function StrikeClient({ locale: _locale }: StrikeClientProps) {
         setLastResult({
           vulnId: data.vulnerability_id,
           stripeLink: data.stripe_link,
-          kinks: data.kinks_found,
+          findings: data.findings_count,
         });
         await loadData();
       }
@@ -246,7 +246,7 @@ export function StrikeClient({ locale: _locale }: StrikeClientProps) {
             >
               <div className="flex items-center gap-2 text-xs font-bold" style={{ color: '#39FF14' }}>
                 <Zap className="w-3.5 h-3.5" />
-                Strike Complete — {lastResult.kinks} kink(s) found
+                Strike Complete — {lastResult.findings} finding(s) logged
               </div>
               <a
                 href={lastResult.stripeLink}
@@ -317,7 +317,7 @@ export function StrikeClient({ locale: _locale }: StrikeClientProps) {
                   <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.3)' }}>
                     {r.tool.category}
                   </span>
-                  <span className="text-[9px] text-white/20">★ {r.tool.rating}</span>
+                  <span className="text-[9px] text-white/20">{(r.tool.success_rate * 100).toFixed(0)}% success</span>
                 </div>
               </div>
             )) : arsenalTools.slice(0, 3).map((tool) => (
@@ -328,7 +328,7 @@ export function StrikeClient({ locale: _locale }: StrikeClientProps) {
               >
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-white/70 truncate">{tool.name}</p>
-                  <p className="text-[10px] text-white/25">{tool.category} · ★ {tool.rating}</p>
+                  <p className="text-[10px] text-white/25">{tool.category} · {(tool.success_rate * 100).toFixed(0)}% success</p>
                 </div>
                 <ChevronRight className="w-3 h-3 text-white/20 shrink-0" />
               </div>
@@ -356,54 +356,61 @@ export function StrikeClient({ locale: _locale }: StrikeClientProps) {
             <p className="text-xs text-white/20 text-center py-4">No kinks discovered yet. Launch a strike.</p>
           ) : (
             <div className="space-y-2">
-              {vulns.slice(0, 6).map((v) => (
-                <div
-                  key={v.id}
-                  className="rounded-lg p-3"
-                  style={{
-                    borderLeft: `3px solid ${SEV_COLORS[v.severity] ?? '#888'}`,
-                    background: 'rgba(255,255,255,0.02)',
-                  }}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-white truncate">{v.title}</p>
-                      <p className="text-[10px] text-white/30 mt-0.5 font-mono truncate">{v.target_url}</p>
+              {vulns.slice(0, 6).map((v) => {
+                const rawTitle = (v.raw_data?.['title'] as string | undefined) ?? v.vulnerability_type ?? 'Unknown';
+                const impactEst = v.raw_data?.['impact_estimate'];
+                const stripeLink = v.raw_data?.['stripe_link'] as string | undefined;
+                return (
+                  <div
+                    key={v.id}
+                    className="rounded-lg p-3"
+                    style={{
+                      borderLeft: `3px solid ${SEV_COLORS[v.severity ?? ''] ?? '#888'}`,
+                      background: 'rgba(255,255,255,0.02)',
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-white truncate">{rawTitle}</p>
+                        <p className="text-[10px] text-white/30 mt-0.5 font-mono truncate">{v.target_url}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span
+                          className="text-[9px] font-bold px-1.5 py-0.5 rounded"
+                          style={{ color: SEV_COLORS[v.severity ?? ''], background: `${SEV_COLORS[v.severity ?? '']}18` }}
+                        >
+                          {v.severity ?? 'Unknown'}
+                        </span>
+                        {impactEst != null && (
+                          <p className="text-[10px] font-mono mt-1" style={{ color: '#39FF14' }}>
+                            +${Number(impactEst).toLocaleString('en-CA')}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-right shrink-0">
+                    <div className="flex items-center gap-2 mt-1.5">
                       <span
-                        className="text-[9px] font-bold px-1.5 py-0.5 rounded"
-                        style={{ color: SEV_COLORS[v.severity], background: `${SEV_COLORS[v.severity]}18` }}
+                        className="text-[9px] px-1.5 py-0.5 rounded"
+                        style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.3)' }}
                       >
-                        {v.severity}
+                        {v.status}
                       </span>
-                      <p className="text-[10px] font-mono mt-1" style={{ color: '#39FF14' }}>
-                        +${Number(v.impact_estimate).toLocaleString('en-CA')}
-                      </p>
+                      {stripeLink && (
+                        <a
+                          href={stripeLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[9px] flex items-center gap-1 transition-colors"
+                          style={{ color: 'rgba(57,255,20,0.5)' }}
+                        >
+                          <ExternalLink className="w-2.5 h-2.5" />
+                          $299
+                        </a>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <span
-                      className="text-[9px] px-1.5 py-0.5 rounded"
-                      style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.3)' }}
-                    >
-                      {v.status}
-                    </span>
-                    {v.stripe_remediation_link && (
-                      <a
-                        href={v.stripe_remediation_link}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[9px] flex items-center gap-1 transition-colors"
-                        style={{ color: 'rgba(57,255,20,0.5)' }}
-                      >
-                        <ExternalLink className="w-2.5 h-2.5" />
-                        $299
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

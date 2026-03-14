@@ -24,8 +24,13 @@ function escHtml(s: string): string {
 
 export function generateGoldenTicketHtml(data: GoldenTicketData): string {
   const { vuln, companyName, contactName, stripeLink } = data;
-  const palette = SEVERITY_PALETTE[vuln.severity] ?? SEVERITY_PALETTE.Medium;
-  const impactStr = `$${vuln.impact_estimate.toLocaleString('en-CA')}`;
+  const palette = SEVERITY_PALETTE[vuln.severity ?? 'Medium'] ?? SEVERITY_PALETTE.Medium;
+
+  const rawTitle = (vuln.raw_data?.['title'] as string | undefined) ?? vuln.vulnerability_type ?? 'Unknown Issue';
+  const rawDesc = (vuln.raw_data?.['description'] as string | undefined) ?? '';
+  const impactEst = vuln.raw_data?.['impact_estimate'];
+  const impactStr = impactEst != null ? `$${Number(impactEst).toLocaleString('en-CA')}` : 'TBD';
+
   const dateStr = new Date(vuln.created_at).toLocaleDateString('en-CA', {
     year: 'numeric',
     month: 'long',
@@ -57,7 +62,6 @@ export function generateGoldenTicketHtml(data: GoldenTicketData): string {
     }
     .wrapper { max-width: 680px; margin: 0 auto; }
 
-    /* HEADER */
     .header {
       background: linear-gradient(135deg, #0f1a2d 0%, #0a1020 100%);
       border-bottom: 2px solid #FFD700;
@@ -78,7 +82,6 @@ export function generateGoldenTicketHtml(data: GoldenTicketData): string {
       align-items: flex-start;
       margin-bottom: 20px;
     }
-    .logo-block {}
     .logo-text {
       font-size: 11px;
       font-weight: 700;
@@ -134,7 +137,6 @@ export function generateGoldenTicketHtml(data: GoldenTicketData): string {
       text-transform: uppercase;
     }
 
-    /* BODY */
     .body { padding: 32px 40px; }
 
     .target-block {
@@ -317,7 +319,7 @@ export function generateGoldenTicketHtml(data: GoldenTicketData): string {
     </div>
     <div class="severity-banner">
       <div class="severity-dot"></div>
-      <span class="severity-label">${escHtml(vuln.severity)} Priority Kink Detected</span>
+      <span class="severity-label">${escHtml(vuln.severity ?? 'Unknown')} Priority Vulnerability Detected</span>
     </div>
   </div>
 
@@ -338,13 +340,13 @@ export function generateGoldenTicketHtml(data: GoldenTicketData): string {
       </div>
     </div>
 
-    <div class="section-title">Kink Discovered</div>
+    <div class="section-title">Vulnerability Discovered</div>
     <div class="kink-block">
-      <div class="kink-title">${escHtml(vuln.title)}</div>
-      <div class="kink-desc">${escHtml(vuln.description)}</div>
+      <div class="kink-title">${escHtml(rawTitle)}</div>
+      <div class="kink-desc">${escHtml(rawDesc)}</div>
       <div class="kink-meta">
-        <span class="kink-tag">${escHtml(vuln.kink_type)}</span>
-        <span class="kink-tag">${escHtml(vuln.severity)}</span>
+        <span class="kink-tag">${escHtml(vuln.vulnerability_type ?? 'UNKNOWN')}</span>
+        <span class="kink-tag">${escHtml(vuln.severity ?? 'Unknown')}</span>
         <span class="kink-tag">Revenue Impact</span>
       </div>
     </div>

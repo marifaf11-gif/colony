@@ -14,16 +14,9 @@ export interface WeaponryResult {
 }
 
 const KEYWORD_CATEGORY_MAP: Record<string, string[]> = {
-  email: ['email', 'contact', 'address', 'outreach', 'prospect', 'newsletter'],
-  enrichment: ['enrich', 'company', 'firmographic', 'employee', 'size', 'industry'],
-  scraping: ['scrape', 'extract', 'crawl', 'data', 'website', 'collect'],
-  'geo-intelligence': ['local', 'map', 'location', 'city', 'region', 'geography', 'law firm', 'restaurant', 'dentist'],
-  'tech-intelligence': ['technology', 'tech stack', 'cms', 'framework', 'platform', 'wordpress'],
-  security: ['security', 'vulnerability', 'port', 'dns', 'subdomain', 'hacking', 'recon', 'exploit'],
-  performance: ['performance', 'speed', 'vitals', 'lcp', 'cls', 'inp', 'pagespeed', 'load time'],
-  seo: ['seo', 'backlink', 'ranking', 'organic', 'keyword', 'authority', 'domain rating'],
-  outreach: ['send', 'deliver', 'email campaign', 'cold email', 'sequence'],
-  payments: ['payment', 'invoice', 'checkout', 'stripe', 'charge', 'billing', 'remediation'],
+  'LEAD-GEN': ['email', 'contact', 'address', 'outreach', 'prospect', 'newsletter', 'enrich', 'company', 'firmographic', 'scrape', 'extract', 'crawl', 'local', 'map', 'send', 'deliver', 'payment', 'invoice', 'stripe'],
+  SEO: ['seo', 'backlink', 'ranking', 'organic', 'keyword', 'authority', 'domain', 'technology', 'tech stack', 'cms', 'framework', 'performance', 'speed', 'vitals', 'lcp', 'cls', 'pagespeed'],
+  SECURITY: ['security', 'vulnerability', 'port', 'dns', 'subdomain', 'hacking', 'recon', 'exploit', 'shodan', 'exposed'],
 };
 
 function detectCategories(task: string): string[] {
@@ -39,7 +32,7 @@ function detectCategories(task: string): string[] {
 
 function keywordScore(tool: ArsenalTool, task: string): number {
   const lower = task.toLowerCase();
-  const allText = `${tool.name} ${tool.description} ${tool.tags.join(' ')}`.toLowerCase();
+  const allText = `${tool.name} ${tool.description ?? ''} ${tool.category ?? ''}`.toLowerCase();
   const words = lower.split(/\s+/).filter((w) => w.length > 3);
   const hits = words.filter((w) => allText.includes(w)).length;
   return hits / Math.max(words.length, 1);
@@ -51,8 +44,8 @@ export async function selectWeapon(query: WeaponryQuery): Promise<WeaponryResult
 
   let dbQuery = supabase
     .from('arsenal_tools')
-    .select('id, name, description, category, endpoint, rating, tags')
-    .order('rating', { ascending: false });
+    .select('id, name, description, category, endpoint_config, success_rate')
+    .order('success_rate', { ascending: false });
 
   if (query.category) {
     dbQuery = dbQuery.eq('category', query.category);
@@ -68,17 +61,8 @@ export async function selectWeapon(query: WeaponryQuery): Promise<WeaponryResult
 
   const scored = (tools as ArsenalTool[]).map((tool) => {
     const kw = keywordScore(tool, query.task);
-    const rating = tool.rating / 5;
-    const score = kw * 0.6 + rating * 0.4;
-
-    const matchedTags = tool.tags.filter((t) =>
-      query.task.toLowerCase().includes(t.toLowerCase())
-    );
-    const reasoning =
-      matchedTags.length > 0
-        ? `Matched on: ${matchedTags.slice(0, 3).join(', ')}. Rating: ${tool.rating}/5`
-        : `Category match: ${tool.category}. Rating: ${tool.rating}/5`;
-
+    const score = kw * 0.6 + tool.success_rate * 0.4;
+    const reasoning = `Category: ${tool.category ?? 'general'}. Success rate: ${(tool.success_rate * 100).toFixed(0)}%`;
     return { tool, score, reasoning };
   });
 

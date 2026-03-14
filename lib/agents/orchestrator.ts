@@ -2,7 +2,6 @@ import { createClient } from '@/lib/supabase/client';
 import { logTerminal } from './terminal-logger';
 import { checkBudget, trackSpend } from './budget-tracker';
 import { sendScoutLog, sendBountyStrike } from './discord-bridge';
-import { generateGoldenTicketHtml } from '@/lib/reports/golden-ticket';
 import { selectWeapon } from '@/lib/arsenal/weaponry-selector';
 import type { OrchestratorConfig, VulnerabilityLog } from './types';
 
@@ -37,7 +36,7 @@ export class AgentOrchestrator {
     await logTerminal('GENERAL', 'BOOT', 'THE GENERAL online — Budget & rate-limit watchdog active.', {});
   }
 
-  async houndScan(targetUrl: string): Promise<string | null> {
+  async houndScan(targetUrl: string, houndId?: string): Promise<string | null> {
     const budgetCheck = await checkBudget('hound');
     if (!budgetCheck.allowed) {
       await logTerminal('GENERAL', 'RATE_LIMIT', `HOUND budget exhausted today. Spent: $${budgetCheck.spentToday.toFixed(4)}`, {
@@ -66,29 +65,29 @@ export class AgentOrchestrator {
       });
     }
 
-    const kinks = await this.runKimiClaw(targetUrl);
-    if (!kinks || kinks.length === 0) {
-      await logTerminal('HOUND', 'COMPLETE', `HOUND: No kinks found on ${targetUrl}`, { target_url: targetUrl });
+    const findings = await this.runKimiClaw(targetUrl);
+    if (!findings || findings.length === 0) {
+      await logTerminal('HOUND', 'COMPLETE', `HOUND: No vulnerabilities found on ${targetUrl}`, { target_url: targetUrl });
       return null;
     }
 
-    const primaryKink = kinks[0];
-    await logTerminal('HOUND', 'VULN_FOUND', `VULN_FOUND → ${primaryKink.title} [${primaryKink.severity}] on ${targetUrl}`, {
+    const primary = findings[0];
+    await logTerminal('HOUND', 'VULN_FOUND', `VULN_FOUND → ${primary.vulnerability_type} [${primary.severity}] on ${targetUrl}`, {
       target_url: targetUrl,
-      metadata: { kinks_found: kinks.length, top_severity: primaryKink.severity },
+      metadata: { findings_count: findings.length, top_severity: primary.severity },
     });
 
     if (this.config.discordScoutWebhook) {
       await sendScoutLog(
         this.config.discordScoutWebhook,
-        `HOUND: VULN_FOUND → ${kinks.length} kink(s) on ${targetUrl}\nTop: ${primaryKink.title} [${primaryKink.severity}]`,
+        `HOUND: VULN_FOUND → ${findings.length} finding(s) on ${targetUrl}\nTop: ${primary.vulnerability_type} [${primary.severity}]`,
         'HOUND',
-        { kinks_found: kinks.length, top_kink: primaryKink.title }
+        { findings_count: findings.length, top_type: primary.vulnerability_type }
       );
     }
 
-    const vulnId = await this.insertVulnerabilityLog(primaryKink, targetUrl);
-    await trackSpend('hound', 0.0004, 800, primaryKink.impact_estimate);
+    const vulnId = await this.insertVulnerabilityLog(primary, targetUrl, houndId);
+    await trackSpend('hound', 0.0004, 800, 0);
 
     return vulnId;
   }
@@ -112,64 +111,38 @@ export class AgentOrchestrator {
     if (error || !vulnRaw) return false;
     const vuln = vulnRaw as VulnerabilityLog;
 
-    await anyFrom(supabase, 'vulnerability_log').update({ status: 'hawk_processing' }).eq('id', vulnerabilityId);
+    await anyFrom(supabase, 'vulnerability_log').update({ status: 'STRIKING' }).eq('id', vulnerabilityId);
 
     await logTerminal('HAWK', 'TARGET_ACQUIRED', `TARGET_ACQUIRED → vuln:${vulnerabilityId.slice(0, 8)} on ${vuln.target_url}`, {
       target_url: vuln.target_url,
       vulnerability_id: vulnerabilityId,
-      metadata: { severity: vuln.severity, impact: vuln.impact_estimate },
+      metadata: { severity: vuln.severity, type: vuln.vulnerability_type },
     });
-
-    const stripeLink = this.config.stripeRemediationBase
-      ? `${this.config.stripeRemediationBase}?prefilled_promo_code=COLONY&client_reference_id=${vulnerabilityId.slice(0, 8)}`
-      : 'https://buy.stripe.com/colony-os-remediation';
-
-    const goldenHtml = generateGoldenTicketHtml({
-      vuln: vuln as VulnerabilityLog,
-      stripeLink,
-    });
-
-    await logTerminal('HAWK', 'TICKET_GENERATED', `TICKET_GENERATED → GT-${vulnerabilityId.slice(0, 8).toUpperCase()}`, {
-      target_url: vuln.target_url,
-      vulnerability_id: vulnerabilityId,
-    });
-
-    type RawClient = { from: (t: string) => { insert: (v: Record<string, unknown>) => { select: (c: string) => { maybeSingle: () => Promise<{ data: Record<string, unknown> | null }> } } } };
-    const { data: ticket } = await (supabase as unknown as RawClient)
-      .from('golden_ticket_reports')
-      .insert({
-        vulnerability_id: vulnerabilityId,
-        target_url: vuln.target_url,
-        html_content: goldenHtml,
-        stripe_link: stripeLink,
-        price_cents: 29900,
-      })
-      .select('id')
-      .maybeSingle();
 
     let discordMsgId: string | null = null;
     if (this.config.discordBountyWebhook) {
       discordMsgId = await sendBountyStrike(
         this.config.discordBountyWebhook,
-        vuln as VulnerabilityLog,
-        ticket?.['id'] ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/get-ticket?id=${ticket['id']}` : undefined
+        vuln as VulnerabilityLog
       );
     }
 
     await anyFrom(supabase, 'vulnerability_log').update({
-      status: 'report_sent',
-      golden_ticket_html: goldenHtml,
-      stripe_remediation_link: stripeLink,
-      discord_message_id: discordMsgId,
+      status: discordMsgId ? 'BOUNTY_PAID' : 'STRIKING',
+      raw_data: {
+        ...(vuln.raw_data ?? {}),
+        discord_message_id: discordMsgId,
+        hawk_processed_at: new Date().toISOString(),
+      },
     }).eq('id', vulnerabilityId);
 
     await logTerminal('HAWK', 'REPORT_SENT', `REPORT_SENT → ${discordMsgId ? '#bounty-strikes notified' : 'local only'} — GT-${vulnerabilityId.slice(0, 8).toUpperCase()}`, {
       target_url: vuln.target_url,
       vulnerability_id: vulnerabilityId,
-      metadata: { discord_sent: !!discordMsgId, stripe_link: stripeLink },
+      metadata: { discord_sent: !!discordMsgId },
     });
 
-    await trackSpend('hawk', 0.0006, 1200, vuln.impact_estimate);
+    await trackSpend('hawk', 0.0006, 1200, 0);
     return true;
   }
 
@@ -195,22 +168,20 @@ export class AgentOrchestrator {
     return { vulnId, success: hawkSuccess };
   }
 
-  private async runKimiClaw(targetUrl: string): Promise<KinkData[]> {
+  private async runKimiClaw(targetUrl: string): Promise<ScanFinding[]> {
     if (this.config.openrouterKey) {
       return this.callOpenRouter(targetUrl);
     }
-    return this.syntheticKinkScan(targetUrl);
+    return this.syntheticScan(targetUrl);
   }
 
-  private async callOpenRouter(targetUrl: string): Promise<KinkData[]> {
-    const prompt = `You are The Hound, an autonomous technical debt discovery agent.
-Analyze the website at ${targetUrl} and identify the top 3 most impactful revenue kinks (technical issues causing lost revenue).
-For each kink, return a JSON array with:
-- title: string (concise issue name)
-- description: string (1-2 sentence technical explanation)
-- kink_type: "vitals" | "conversion" | "seo" | "security"
+  private async callOpenRouter(targetUrl: string): Promise<ScanFinding[]> {
+    const prompt = `You are The Hound, an autonomous vulnerability discovery agent.
+Analyze the website at ${targetUrl} and identify the top 3 most impactful vulnerabilities or technical issues.
+For each finding, return a JSON array with:
+- vulnerability_type: "BILL_96" | "SEO_KINK" | "TECH_DEBT" | "SECURITY" | "PERFORMANCE"
 - severity: "Critical" | "High" | "Medium" | "Low"
-- impact_estimate: number (estimated annual $ revenue loss)
+- raw_data: object with title, description, impact_estimate, and any other relevant data
 
 Return ONLY valid JSON array, nothing else.`;
 
@@ -231,71 +202,82 @@ Return ONLY valid JSON array, nothing else.`;
         }),
       });
 
-      if (!res.ok) return this.syntheticKinkScan(targetUrl);
+      if (!res.ok) return this.syntheticScan(targetUrl);
 
       const data = await res.json();
       const content = data.choices?.[0]?.message?.content ?? '[]';
       const jsonMatch = content.match(/\[[\s\S]*\]/);
-      if (!jsonMatch) return this.syntheticKinkScan(targetUrl);
+      if (!jsonMatch) return this.syntheticScan(targetUrl);
 
-      const kinks = JSON.parse(jsonMatch[0]) as KinkData[];
-      return kinks.slice(0, 3);
+      const findings = JSON.parse(jsonMatch[0]) as ScanFinding[];
+      return findings.slice(0, 3);
     } catch {
-      return this.syntheticKinkScan(targetUrl);
+      return this.syntheticScan(targetUrl);
     }
   }
 
-  private syntheticKinkScan(targetUrl: string): KinkData[] {
+  private syntheticScan(targetUrl: string): ScanFinding[] {
     const domain = (() => {
       try { return new URL(targetUrl).hostname; } catch { return targetUrl; }
     })();
 
-    const pool: KinkData[] = [
+    const pool: ScanFinding[] = [
       {
-        title: 'Largest Contentful Paint > 4.2s',
-        description: 'LCP severely impacts user retention. Each 1s delay reduces conversions by ~7%.',
-        kink_type: 'vitals',
+        vulnerability_type: 'PERFORMANCE',
         severity: 'High',
-        impact_estimate: 24500,
+        raw_data: {
+          title: 'Largest Contentful Paint > 4.2s',
+          description: 'LCP severely impacts user retention. Each 1s delay reduces conversions by ~7%.',
+          impact_estimate: 24500,
+        },
       },
       {
-        title: 'No Exit-Intent Capture',
-        description: `${domain} has no exit-intent overlay. Industry average recovery rate is 7% of abandoning visitors.`,
-        kink_type: 'conversion',
+        vulnerability_type: 'SEO_KINK',
         severity: 'High',
-        impact_estimate: 18700,
+        raw_data: {
+          title: 'No Exit-Intent Capture',
+          description: `${domain} has no exit-intent overlay. Industry average recovery rate is 7% of abandoning visitors.`,
+          impact_estimate: 18700,
+        },
       },
       {
-        title: 'Missing Content-Security-Policy',
-        description: 'No CSP header detected. XSS injection vectors are exposed to malicious actors.',
-        kink_type: 'security',
+        vulnerability_type: 'SECURITY',
         severity: 'Critical',
-        impact_estimate: 45000,
+        raw_data: {
+          title: 'Missing Content-Security-Policy',
+          description: 'No CSP header detected. XSS injection vectors are exposed to malicious actors.',
+          impact_estimate: 45000,
+        },
       },
       {
-        title: 'Zero Structured Data (JSON-LD)',
-        description: 'No schema markup detected. Rich snippets increase CTR by 20-30% for commercial queries.',
-        kink_type: 'seo',
+        vulnerability_type: 'TECH_DEBT',
         severity: 'Medium',
-        impact_estimate: 11200,
+        raw_data: {
+          title: 'Zero Structured Data (JSON-LD)',
+          description: 'No schema markup detected. Rich snippets increase CTR by 20-30% for commercial queries.',
+          impact_estimate: 11200,
+        },
       },
     ];
 
     return pool.sort(() => Math.random() - 0.5).slice(0, 2);
   }
 
-  private async insertVulnerabilityLog(kink: KinkData, targetUrl: string): Promise<string> {
+  private async insertVulnerabilityLog(finding: ScanFinding, targetUrl: string, houndId?: string): Promise<string> {
     const supabase = createClient();
+    const domain = (() => {
+      try { return new URL(targetUrl).hostname; } catch { return targetUrl; }
+    })();
+
     const { data } = await anyFrom(supabase, 'vulnerability_log')
       .insert({
         target_url: targetUrl,
-        kink_type: kink.kink_type,
-        title: kink.title,
-        description: kink.description,
-        severity: kink.severity,
-        impact_estimate: kink.impact_estimate,
-        status: 'pending',
-        metadata: { source: 'hound', auto_generated: true },
+        target_name: domain,
+        vulnerability_type: finding.vulnerability_type,
+        severity: finding.severity,
+        raw_data: finding.raw_data,
+        status: 'DETECTED',
+        hound_id: houndId ?? 'hound-client',
       })
       .select('id')
       .maybeSingle();
@@ -304,12 +286,10 @@ Return ONLY valid JSON array, nothing else.`;
   }
 }
 
-interface KinkData {
-  title: string;
-  description: string;
-  kink_type: string;
-  severity: 'Critical' | 'High' | 'Medium' | 'Low';
-  impact_estimate: number;
+interface ScanFinding {
+  vulnerability_type: string;
+  severity: string;
+  raw_data: Record<string, unknown>;
 }
 
 let globalOrchestrator: AgentOrchestrator | null = null;

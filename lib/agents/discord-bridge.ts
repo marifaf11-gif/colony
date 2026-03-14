@@ -69,23 +69,23 @@ export async function sendBountyStrike(
 ): Promise<string | null> {
   if (!webhookUrl) return null;
 
-  const color = SEVERITY_COLORS[vuln.severity] ?? 0x4a9eff;
-  const impactStr = `$${vuln.impact_estimate.toLocaleString('en-CA')}`;
+  const color = SEVERITY_COLORS[vuln.severity ?? 'Low'] ?? 0x4a9eff;
+  const rawTitle = (vuln.raw_data?.['title'] as string | undefined) ?? vuln.vulnerability_type ?? 'Unknown';
+  const rawDesc = (vuln.raw_data?.['description'] as string | undefined) ?? '';
+  const impactEst = vuln.raw_data?.['impact_estimate'];
+  const impactStr = impactEst != null ? `$${Number(impactEst).toLocaleString('en-CA')}` : 'TBD';
 
   const embed: DiscordEmbed = {
-    title: `BOUNTY STRIKE // ${vuln.severity.toUpperCase()} KINK DETECTED`,
-    description: `**${vuln.title}**\n\n${vuln.description}`,
+    title: `BOUNTY STRIKE // ${(vuln.severity ?? 'UNKNOWN').toUpperCase()} DETECTED`,
+    description: `**${rawTitle}**\n\n${rawDesc}`,
     color,
     fields: [
       { name: 'Target', value: `\`${vuln.target_url}\``, inline: false },
-      { name: 'Kink Type', value: vuln.kink_type, inline: true },
-      { name: 'Severity', value: vuln.severity, inline: true },
-      { name: 'Revenue Impact', value: impactStr, inline: true },
+      { name: 'Type', value: vuln.vulnerability_type ?? 'UNKNOWN', inline: true },
+      { name: 'Severity', value: vuln.severity ?? 'Unknown', inline: true },
+      { name: 'Est. Impact', value: impactStr, inline: true },
       ...(goldenTicketUrl
         ? [{ name: 'Golden Ticket', value: `[View Report](${goldenTicketUrl})`, inline: false }]
-        : []),
-      ...(vuln.stripe_remediation_link
-        ? [{ name: 'Remediation Link ($299)', value: `[Pay Now](${vuln.stripe_remediation_link})`, inline: false }]
         : []),
     ],
     footer: { text: `Colony OS // HAWK UNIT // vuln:${vuln.id.slice(0, 8)}` },
@@ -93,7 +93,7 @@ export async function sendBountyStrike(
   };
 
   const payload = {
-    content: `@here **HAWK: TARGET_ACQUIRED** — ${vuln.severity} kink on \`${vuln.target_url}\` — Est. ${impactStr}`,
+    content: `@here **HAWK: TARGET_ACQUIRED** — ${vuln.severity ?? 'Unknown'} on \`${vuln.target_url}\` — Est. ${impactStr}`,
     embeds: [embed],
     components: [
       {
