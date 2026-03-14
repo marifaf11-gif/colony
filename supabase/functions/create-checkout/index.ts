@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import Stripe from "npm:stripe@14";
+import Stripe from "npm:stripe@17";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -50,8 +50,8 @@ Deno.serve(async (req: Request) => {
       return new Response("Strike not found", { status: 404, headers: corsHeaders });
     }
 
-    const stripe  = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
-    const hostUrl = Deno.env.get("APP_HOST_URL") ?? "https://colony-os.app";
+    const stripe  = new Stripe(stripeKey, { apiVersion: "2025-02-24.acacia" });
+    const hostUrl = Deno.env.get("APP_HOST_URL") ?? "https://colonyos.netlify.app";
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
