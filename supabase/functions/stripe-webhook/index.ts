@@ -16,9 +16,9 @@ Deno.serve(async (req: Request) => {
   const correlationId = crypto.randomUUID();
 
   try {
-    const stripeSecretKey   = Deno.env.get("STRIPE_SECRET_KEY")!;
-    const webhookSecret     = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
-    const stripe            = new Stripe(stripeSecretKey, { apiVersion: "2025-02-24.acacia" });
+    const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY")!;
+    const webhookSecret   = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
+    const stripe          = new Stripe(stripeSecretKey, { apiVersion: "2025-02-24.acacia" });
 
     const body      = await req.text();
     const signature = req.headers.get("stripe-signature");
@@ -51,25 +51,40 @@ Deno.serve(async (req: Request) => {
       const strikeId = session.metadata?.strike_id;
 
       if (strikeId) {
-        const { error } = await supabase
-          .from("strikes")
-          .update({
-            status:     "BOUNTY_PAID",
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", strikeId);
+        const [updateErr, paymentErr] = await Promise.all([
+          supabase
+            .from("strikes")
+            .update({ status: "BOUNTY_PAID", updated_at: new Date().toISOString() })
+            .eq("id", strikeId)
+            .then(({ error }) => error),
 
-        if (error) {
-          console.log(JSON.stringify({ event: "stripe-webhook-update-error", correlationId, strikeId, error: error.message }));
-        } else {
+          supabase
+            .from("payments")
+            .insert({
+              strike_id:                strikeId,
+              stripe_session_id:        session.id,
+              stripe_payment_intent_id: typeof session.payment_intent === "string" ? session.payment_intent : null,
+              amount_cents:             session.amount_total ?? 29900,
+              currency:                 session.currency    ?? "cad",
+              status:                   "succeeded",
+              customer_email:           session.customer_email ?? session.customer_details?.email ?? null,
+              metadata:                 session.metadata ?? {},
+            })
+            .then(({ error }) => error),
+        ]);
+
+        if (updateErr)  console.log(JSON.stringify({ event: "stripe-webhook-update-error",  correlationId, error: updateErr.message }));
+        if (paymentErr) console.log(JSON.stringify({ event: "stripe-webhook-payment-error", correlationId, error: paymentErr.message }));
+
+        if (!updateErr && !paymentErr) {
           await supabase.from("notifications").insert({
             type: "discord",
             payload: {
-              content: `[PAYMENT] Strike **${strikeId}** marked BOUNTY_PAID — $${((session.amount_total ?? 0) / 100).toFixed(2)} ${session.currency?.toUpperCase()}`,
+              content: `[PAID] Strike **${strikeId}** — $${((session.amount_total ?? 0) / 100).toFixed(2)} ${(session.currency ?? "cad").toUpperCase()} received from ${session.customer_email ?? "unknown"}`,
               correlationId,
             },
           });
-          console.log(JSON.stringify({ event: "stripe-webhook-paid", correlationId, strikeId }));
+          console.log(JSON.stringify({ event: "stripe-webhook-paid", correlationId, strikeId, amount: session.amount_total }));
         }
       }
     }
@@ -83,6 +98,7 @@ Deno.serve(async (req: Request) => {
           .update({ status: "AUDITED", updated_at: new Date().toISOString() })
           .eq("id", strikeId)
           .eq("status", "CHECKOUT_PENDING");
+        console.log(JSON.stringify({ event: "stripe-webhook-expired", correlationId, strikeId }));
       }
     }
 
