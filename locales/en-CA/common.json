@@ -1,0 +1,77 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "settings": "Settings",
+    "profile": "Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "signup": "Sign Up",
+    "language": "Language"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me",
+    "signInWithEmail": "Sign in with Email",
+    "createAccount": "Create Account",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "resetPassword": "Reset Password",
+    "checkEmail": "Check your email",
+    "signOut": "Sign Out"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "errors": {
+    "generic": "An error occurred. Please try again.",
+    "network": "Network error. Please check your connection.",
+    "unauthorized": "You are not authorized to perform this action.",
+    "notFound": "The requested resource was not found.",
+    "validation": "Please check your input and try again."
+  },
+  "app": {
+    "title": "Colony OS",
+    "description": "A skeuomorphic operating system interface"
+  },
+  "pod": {
+    "conversionCatalyst": {
+      "title": "Conversion Catalyst",
+      "description": "AI-driven SEO & Revenue Leak Auditor",
+      "urlPlaceholder": "https://your-site.com",
+      "startScan": "Start Scan",
+      "scanning": "Scanning...",
+      "scanComplete": "Scan Complete",
+      "downloadReport": "Download Profit Blueprint",
+      "estimatedRevenue": "Estimated Recoverable Revenue",
+      "leakSeverity": "Leak Severity",
+      "coreVitals": "Core Vitals",
+      "conversionArch": "Conversion Architecture",
+      "seoSurface": "SEO Surface"
+    }
+  },
+  "dashboard": {
+    "legalMode": "Legal Compliance",
+    "profitMode": "Profit Optimization",
+    "globalCommand": "Global Command Centre"
+  }
+}

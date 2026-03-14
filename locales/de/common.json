@@ -1,0 +1,77 @@
+{
+  "common": {
+    "welcome": "Willkommen",
+    "loading": "Wird geladen...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "previous": "Vorherige",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "sort": "Sortieren",
+    "settings": "Einstellungen",
+    "profile": "Profil",
+    "logout": "Abmelden",
+    "login": "Anmelden",
+    "signup": "Registrieren",
+    "language": "Sprache"
+  },
+  "auth": {
+    "email": "E-Mail",
+    "password": "Passwort",
+    "forgotPassword": "Passwort vergessen?",
+    "rememberMe": "Angemeldet bleiben",
+    "signInWithEmail": "Mit E-Mail anmelden",
+    "createAccount": "Konto erstellen",
+    "alreadyHaveAccount": "Bereits ein Konto?",
+    "dontHaveAccount": "Noch kein Konto?",
+    "resetPassword": "Passwort zurücksetzen",
+    "checkEmail": "Überprüfen Sie Ihre E-Mail",
+    "signOut": "Abmelden"
+  },
+  "navigation": {
+    "home": "Startseite",
+    "dashboard": "Dashboard",
+    "about": "Über uns",
+    "contact": "Kontakt"
+  },
+  "errors": {
+    "generic": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    "network": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.",
+    "unauthorized": "Sie sind nicht berechtigt, diese Aktion auszuführen.",
+    "notFound": "Die angeforderte Ressource wurde nicht gefunden.",
+    "validation": "Bitte überprüfen Sie Ihre Eingabe und versuchen Sie es erneut."
+  },
+  "app": {
+    "title": "Colony OS",
+    "description": "Eine skeuomorphe Betriebssystemoberfläche"
+  },
+  "pod": {
+    "conversionCatalyst": {
+      "title": "Konversions-Katalysator",
+      "description": "KI-gesteuerter SEO- & Umsatzverlust-Prüfer",
+      "urlPlaceholder": "https://ihre-website.de",
+      "startScan": "Scan starten",
+      "scanning": "Wird gescannt...",
+      "scanComplete": "Scan abgeschlossen",
+      "downloadReport": "Gewinnplan herunterladen",
+      "estimatedRevenue": "Geschätzter wiederherstellbarer Umsatz",
+      "leakSeverity": "Verlust-Schweregrad",
+      "coreVitals": "Kern-Metriken",
+      "conversionArch": "Konversionsarchitektur",
+      "seoSurface": "SEO-Oberfläche"
+    }
+  },
+  "dashboard": {
+    "legalMode": "Rechtliche Compliance",
+    "profitMode": "Gewinnoptimierung",
+    "globalCommand": "Globale Kommandozentrale"
+  }
+}

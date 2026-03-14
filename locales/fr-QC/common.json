@@ -1,0 +1,77 @@
+{
+  "common": {
+    "welcome": "Bienvenue",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "settings": "Paramètres",
+    "profile": "Profil",
+    "logout": "Déconnexion",
+    "login": "Connexion",
+    "signup": "Inscription",
+    "language": "Langue"
+  },
+  "auth": {
+    "email": "Courriel",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié?",
+    "rememberMe": "Se souvenir de moi",
+    "signInWithEmail": "Se connecter avec courriel",
+    "createAccount": "Créer un compte",
+    "alreadyHaveAccount": "Vous avez déjà un compte?",
+    "dontHaveAccount": "Vous n'avez pas de compte?",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "checkEmail": "Vérifiez votre courriel",
+    "signOut": "Se déconnecter"
+  },
+  "navigation": {
+    "home": "Accueil",
+    "dashboard": "Tableau de bord",
+    "about": "À propos",
+    "contact": "Contact"
+  },
+  "errors": {
+    "generic": "Une erreur s'est produite. Veuillez réessayer.",
+    "network": "Erreur réseau. Veuillez vérifier votre connexion.",
+    "unauthorized": "Vous n'êtes pas autorisé à effectuer cette action.",
+    "notFound": "La ressource demandée n'a pas été trouvée.",
+    "validation": "Veuillez vérifier votre saisie et réessayer."
+  },
+  "app": {
+    "title": "Colonie OS",
+    "description": "Une interface de système d'exploitation skeuomorphique"
+  },
+  "pod": {
+    "conversionCatalyst": {
+      "title": "Catalyseur de Conversion",
+      "description": "Auditeur SEO et pertes de revenus alimenté par IA",
+      "urlPlaceholder": "https://votre-site.com",
+      "startScan": "Lancer l'analyse",
+      "scanning": "Analyse en cours...",
+      "scanComplete": "Analyse terminée",
+      "downloadReport": "Télécharger le Plan de Profit",
+      "estimatedRevenue": "Revenus récupérables estimés",
+      "leakSeverity": "Gravité des pertes",
+      "coreVitals": "Métriques principales",
+      "conversionArch": "Architecture de conversion",
+      "seoSurface": "Surface SEO"
+    }
+  },
+  "dashboard": {
+    "legalMode": "Conformité légale",
+    "profitMode": "Optimisation des profits",
+    "globalCommand": "Centre de commandement mondial"
+  }
+}

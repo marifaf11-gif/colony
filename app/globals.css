@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Skeuomorphic Color System */
+    --metal-base: 192 5% 79%;
+    --metal-dark: 210 6% 42%;
+    --metal-highlight: 210 14% 93%;
+    --metal-shadow: 210 13% 34%;
+
+    --leather-dark: 210 4% 18%;
+    --leather-base: 210 4% 24%;
+    --leather-light: 210 4% 29%;
+
+    /* Semantic Colors (shadcn compatible) */
+    --background: var(--metal-base);
+    --foreground: 210 13% 10%;
+
+    --card: var(--metal-highlight);
+    --card-foreground: var(--foreground);
+
+    --popover: var(--metal-highlight);
+    --popover-foreground: var(--foreground);
+
+    --primary: 211 100% 64%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: var(--metal-dark);
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 210 6% 50%;
+    --muted-foreground: 210 5% 30%;
+
+    --accent: 211 100% 64%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 4 90% 58%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 134 50% 51%;
+    --success-foreground: 0 0% 98%;
+
+    --border: 210 8% 60%;
+    --input: var(--metal-dark);
+    --ring: var(--primary);
+
+    --radius: 8px;
+
+    /* Physical Shadows */
+    --shadow-inner-subtle: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-inner-medium: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-inner-deep: inset 0 3px 6px rgba(0, 0, 0, 0.4);
+
+    --shadow-outer-subtle: 0 1px 3px rgba(0, 0, 0, 0.2);
+    --shadow-outer-raised: 0 4px 8px rgba(0, 0, 0, 0.25);
+    --shadow-outer-floating: 0 8px 24px rgba(0, 0, 0, 0.3);
+    --shadow-outer-modal: 0 16px 48px rgba(0, 0, 0, 0.4);
+
+    --shadow-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+
+    /* Backdrop Blur */
+    --blur-glass: 12px;
+    --blur-frosted: 24px;
+  }
+
+  .dark {
+    --background: var(--leather-dark);
+    --foreground: 210 14% 93%;
+
+    --card: var(--leather-base);
+    --card-foreground: var(--foreground);
+
+    --popover: var(--leather-base);
+    --popover-foreground: var(--foreground);
+
+    --primary: 211 100% 64%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: var(--leather-light);
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 210 4% 35%;
+    --muted-foreground: 210 5% 65%;
+
+    --accent: 211 100% 64%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 4 90% 58%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 134 50% 51%;
+    --success-foreground: 0 0% 98%;
+
+    --border: 210 6% 35%;
+    --input: var(--leather-light);
+    --ring: var(--primary);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Skeuomorphic Utilities */
+  .metal-gradient {
+    background: linear-gradient(135deg, hsl(var(--metal-highlight)) 0%, hsl(var(--metal-base)) 50%, hsl(var(--metal-dark)) 100%);
+  }
+
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(var(--blur-glass));
+    -webkit-backdrop-filter: blur(var(--blur-glass));
+  }
+
+  .inner-shadow {
+    box-shadow: var(--shadow-inner-medium);
+  }
+
+  .raised-shadow {
+    box-shadow: var(--shadow-outer-raised), var(--shadow-highlight);
+  }
+
+  .floating-shadow {
+    box-shadow: var(--shadow-outer-floating), var(--shadow-highlight);
+  }
+}

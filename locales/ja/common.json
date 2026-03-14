@@ -1,0 +1,77 @@
+{
+  "common": {
+    "welcome": "ようこそ",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "close": "閉じる",
+    "confirm": "確認",
+    "back": "戻る",
+    "next": "次へ",
+    "previous": "前へ",
+    "search": "検索",
+    "filter": "フィルター",
+    "sort": "並び替え",
+    "settings": "設定",
+    "profile": "プロフィール",
+    "logout": "ログアウト",
+    "login": "ログイン",
+    "signup": "サインアップ",
+    "language": "言語"
+  },
+  "auth": {
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "forgotPassword": "パスワードを忘れましたか？",
+    "rememberMe": "ログイン状態を保持",
+    "signInWithEmail": "メールでサインイン",
+    "createAccount": "アカウントを作成",
+    "alreadyHaveAccount": "すでにアカウントをお持ちですか？",
+    "dontHaveAccount": "アカウントをお持ちでないですか？",
+    "resetPassword": "パスワードをリセット",
+    "checkEmail": "メールをご確認ください",
+    "signOut": "サインアウト"
+  },
+  "navigation": {
+    "home": "ホーム",
+    "dashboard": "ダッシュボード",
+    "about": "概要",
+    "contact": "お問い合わせ"
+  },
+  "errors": {
+    "generic": "エラーが発生しました。もう一度お試しください。",
+    "network": "ネットワークエラー。接続を確認してください。",
+    "unauthorized": "この操作を実行する権限がありません。",
+    "notFound": "要求されたリソースが見つかりませんでした。",
+    "validation": "入力内容を確認してもう一度お試しください。"
+  },
+  "app": {
+    "title": "Colony OS",
+    "description": "スキューモーフィックなOSインターフェース"
+  },
+  "pod": {
+    "conversionCatalyst": {
+      "title": "コンバージョン・カタリスト",
+      "description": "AI駆動のSEO・収益漏洩監査ツール",
+      "urlPlaceholder": "https://your-site.jp",
+      "startScan": "スキャン開始",
+      "scanning": "スキャン中...",
+      "scanComplete": "スキャン完了",
+      "downloadReport": "収益設計書をダウンロード",
+      "estimatedRevenue": "推定回収可能収益",
+      "leakSeverity": "漏洩深刻度",
+      "coreVitals": "コアバイタル",
+      "conversionArch": "コンバージョン設計",
+      "seoSurface": "SEO表面積"
+    }
+  },
+  "dashboard": {
+    "legalMode": "法令遵守",
+    "profitMode": "利益最適化",
+    "globalCommand": "グローバル指令センター"
+  }
+}

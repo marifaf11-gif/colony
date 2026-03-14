@@ -1,0 +1,77 @@
+{
+  "common": {
+    "welcome": "Bienvenido",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "settings": "Configuración",
+    "profile": "Perfil",
+    "logout": "Cerrar sesión",
+    "login": "Iniciar sesión",
+    "signup": "Registrarse",
+    "language": "Idioma"
+  },
+  "auth": {
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "forgotPassword": "¿Olvidó su contraseña?",
+    "rememberMe": "Recordarme",
+    "signInWithEmail": "Iniciar sesión con correo",
+    "createAccount": "Crear cuenta",
+    "alreadyHaveAccount": "¿Ya tiene una cuenta?",
+    "dontHaveAccount": "¿No tiene una cuenta?",
+    "resetPassword": "Restablecer contraseña",
+    "checkEmail": "Revise su correo",
+    "signOut": "Cerrar sesión"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "dashboard": "Panel de control",
+    "about": "Acerca de",
+    "contact": "Contacto"
+  },
+  "errors": {
+    "generic": "Ocurrió un error. Por favor intente de nuevo.",
+    "network": "Error de red. Por favor verifique su conexión.",
+    "unauthorized": "No está autorizado para realizar esta acción.",
+    "notFound": "El recurso solicitado no fue encontrado.",
+    "validation": "Por favor verifique su entrada e intente de nuevo."
+  },
+  "app": {
+    "title": "Colony OS",
+    "description": "Una interfaz de sistema operativo escuomórfico"
+  },
+  "pod": {
+    "conversionCatalyst": {
+      "title": "Catalizador de Conversión",
+      "description": "Auditor de SEO e ingresos perdidos impulsado por IA",
+      "urlPlaceholder": "https://su-sitio.com",
+      "startScan": "Iniciar Escaneo",
+      "scanning": "Escaneando...",
+      "scanComplete": "Escaneo Completo",
+      "downloadReport": "Descargar Plan de Ganancias",
+      "estimatedRevenue": "Ingresos Recuperables Estimados",
+      "leakSeverity": "Severidad de Pérdida",
+      "coreVitals": "Métricas Principales",
+      "conversionArch": "Arquitectura de Conversión",
+      "seoSurface": "Superficie SEO"
+    }
+  },
+  "dashboard": {
+    "legalMode": "Cumplimiento Legal",
+    "profitMode": "Optimización de Ganancias",
+    "globalCommand": "Centro de Comando Global"
+  }
+}
