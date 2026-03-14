@@ -259,6 +259,8 @@ export function HubClient({ locale }: HubClientProps) {
     'cyberhawk': true, 'conversion-catalyst': true, 'scout': false, 'kaltrac-v2': false,
   });
   const [scanning, setScanning]             = useState(false);
+  const [scanStartedAt, setScanStartedAt]   = useState<number | null>(null);
+  const [scanStuck, setScanStuck]           = useState(false);
   const [selectedStrike, setSelectedStrike] = useState<StrikeRow | null>(null);
   const [highlightedBlipId, setHighlightedBlipId] = useState<string | null>(null);
   const [severityFilter, setSeverityFilter] = useState<'ALL' | 'HIGH' | 'MEDIUM' | 'LOW'>('ALL');
@@ -284,12 +286,37 @@ export function HubClient({ locale }: HubClientProps) {
       .channel('hub-rt')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'strikes' }, loadStrikes)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'app_state' }, ({ new: row }) => {
-        setScanning((row as { is_scanning: boolean }).is_scanning ?? false);
+        const isNowScanning = (row as { is_scanning: boolean }).is_scanning ?? false;
+        setScanning(isNowScanning);
+        if (isNowScanning) {
+          setScanStartedAt(Date.now());
+          setScanStuck(false);
+        } else {
+          setScanStartedAt(null);
+          setScanStuck(false);
+        }
       })
       .subscribe();
 
     return () => { sb.removeChannel(ch); };
   }, [loadStrikes]);
+
+  useEffect(() => {
+    if (!scanning || !scanStartedAt) { setScanStuck(false); return; }
+    const timer = setInterval(() => {
+      if (Date.now() - scanStartedAt > 5 * 60 * 1000) setScanStuck(true);
+    }, 15000);
+    return () => clearInterval(timer);
+  }, [scanning, scanStartedAt]);
+
+  const resetScan = useCallback(async () => {
+    const sb = createClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (sb as any).from('app_state').update({ is_scanning: false, updated_at: new Date().toISOString() }).eq('id', 1);
+    setScanning(false);
+    setScanStartedAt(null);
+    setScanStuck(false);
+  }, []);
 
   const runScout = useCallback(async () => {
     setScanning(true);
@@ -392,6 +419,15 @@ export function HubClient({ locale }: HubClientProps) {
               style={{ color: scanning ? '#FFB830' : '#39FF14' }}>
               {scanning ? 'SCANNING...' : 'LIVE'}
             </span>
+            {scanStuck && (
+              <button
+                onClick={resetScan}
+                className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold tracking-widest uppercase transition-all hover:opacity-80"
+                style={{ background: 'rgba(255,59,59,0.12)', border: '1px solid rgba(255,59,59,0.35)', color: '#FF3B3B' }}
+                title="Scan appears stuck — click to reset">
+                RESET
+              </button>
+            )}
           </div>
           <div className="text-right">
             <p className="text-[9px] tracking-widest" style={{ color: 'rgba(255,255,255,0.2)' }}>BOUNTY_POOL</p>
