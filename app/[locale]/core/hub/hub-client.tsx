@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { RadarScanner, type RadarBlip } from '@/components/colony/radar-scanner';
 import { CncToggle } from '@/components/colony/cnc-toggle';
 import { FleetTelemetryFeed } from '@/components/colony/fleet-telemetry-feed';
-import { Zap, Eye, Activity, TrendingUp, ChevronRight, Crosshair, Radio, Server, Shield, Search, X, ExternalLink, Mail, MessageSquare, Loader as Loader2, CreditCard, Filter } from 'lucide-react';
+import { Zap, Eye, Activity, TrendingUp, ChevronRight, Crosshair, Radio, Server, Shield, Search, X, ExternalLink, Mail, MessageSquare, Loader as Loader2, CreditCard, Filter, CircleCheck as CheckCircle2, BadgeCheck } from 'lucide-react';
 import { PaymentsPanel } from '@/components/colony/payments-panel';
 
 interface HubClientProps { locale: string }
@@ -141,6 +141,13 @@ function AuditModal({ strike, onClose, onStrike }: { strike: StrikeRow; onClose:
               style={{ color: col, background: `${col}15`, border: `1px solid ${col}30` }}>
               {strike.severity}
             </span>
+            {strike.status === 'BOUNTY_PAID' && (
+              <span className="flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded tracking-widest"
+                style={{ color: '#39FF14', background: 'rgba(57,255,20,0.12)', border: '1px solid rgba(57,255,20,0.35)' }}>
+                <BadgeCheck className="w-3 h-3" />
+                PAID
+              </span>
+            )}
           </div>
           <button onClick={onClose} className="text-white/30 hover:text-white/70 transition-colors">
             <X className="w-4 h-4" />
@@ -198,7 +205,19 @@ function AuditModal({ strike, onClose, onStrike }: { strike: StrikeRow; onClose:
             </div>
           )}
 
-          {strikeResult ? (
+          {strike.status === 'BOUNTY_PAID' ? (
+            <div className="rounded-lg p-4 text-center"
+              style={{ background: 'linear-gradient(135deg, rgba(57,255,20,0.07), rgba(57,255,20,0.03))', border: '1px solid rgba(57,255,20,0.25)', boxShadow: '0 0 24px rgba(57,255,20,0.06)' }}>
+              <CheckCircle2 className="w-8 h-8 mx-auto mb-2" style={{ color: '#39FF14', filter: 'drop-shadow(0 0 8px rgba(57,255,20,0.5))' }} />
+              <p className="text-sm font-bold tracking-widest uppercase" style={{ color: '#39FF14' }}>BOUNTY COLLECTED</p>
+              <p className="text-[10px] mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                ${(strike.revenue_value / 100).toLocaleString('en-CA')} received via Stripe
+              </p>
+              <p className="text-[9px] mt-2 tracking-widest" style={{ color: 'rgba(57,255,20,0.5)' }}>
+                REMEDIATION INVOICE PAID — NO FURTHER ACTION REQUIRED
+              </p>
+            </div>
+          ) : strikeResult ? (
             <div style={{ background: 'rgba(57,255,20,0.06)', border: '1px solid rgba(57,255,20,0.2)', borderRadius: 8, padding: '14px' }}>
               <p className="text-[9px] font-bold tracking-widest uppercase mb-3" style={{ color: '#39FF14' }}>EMAIL STAGED — READY TO SEND</p>
               <div className="flex flex-wrap gap-2">
@@ -582,18 +601,26 @@ export function HubClient({ locale }: HubClientProps) {
                   <button key={s.id}
                     onClick={() => { setSelectedStrike(s); setHighlightedBlipId(s.id); }}
                     className="w-full text-left flex items-start gap-2.5 py-2 px-2 rounded-lg transition-all hover:bg-white/5"
-                    style={{ border: `1px solid ${highlightedBlipId === s.id ? `${col}30` : 'transparent'}` }}>
-                    <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: col, boxShadow: `0 0 4px ${col}` }} />
+                    style={{ border: `1px solid ${s.status === 'BOUNTY_PAID' ? 'rgba(57,255,20,0.18)' : highlightedBlipId === s.id ? `${col}30` : 'transparent'}`, background: s.status === 'BOUNTY_PAID' ? 'rgba(57,255,20,0.03)' : undefined }}>
+                    <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: s.status === 'BOUNTY_PAID' ? '#39FF14' : col, boxShadow: s.status === 'BOUNTY_PAID' ? '0 0 6px rgba(57,255,20,0.6)' : `0 0 4px ${col}` }} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-bold truncate" style={{ color: 'rgba(255,255,255,0.75)' }}>{s.company_name}</p>
+                      <p className="text-[10px] font-bold truncate" style={{ color: s.status === 'BOUNTY_PAID' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.75)' }}>{s.company_name}</p>
                       <p className="text-[9px] mt-0.5 truncate" style={{ color: 'rgba(255,255,255,0.25)' }}>{s.website.replace('https://', '')}</p>
                     </div>
-                    <div className="text-right shrink-0">
-                      <span className="text-[8px] font-bold px-1 py-0.5 rounded"
-                        style={{ color: col, background: `${col}15`, border: `1px solid ${col}25` }}>
-                        {s.severity}
-                      </span>
-                      <p className="text-[9px] mt-1 font-mono" style={{ color: '#39FF14' }}>
+                    <div className="text-right shrink-0 space-y-0.5">
+                      {s.status === 'BOUNTY_PAID' ? (
+                        <span className="flex items-center gap-0.5 text-[8px] font-bold px-1 py-0.5 rounded"
+                          style={{ color: '#39FF14', background: 'rgba(57,255,20,0.12)', border: '1px solid rgba(57,255,20,0.3)' }}>
+                          <BadgeCheck className="w-2.5 h-2.5" />
+                          PAID
+                        </span>
+                      ) : (
+                        <span className="text-[8px] font-bold px-1 py-0.5 rounded"
+                          style={{ color: col, background: `${col}15`, border: `1px solid ${col}25` }}>
+                          {s.severity}
+                        </span>
+                      )}
+                      <p className="text-[9px] font-mono" style={{ color: s.status === 'BOUNTY_PAID' ? 'rgba(57,255,20,0.6)' : '#39FF14' }}>
                         ${(s.revenue_value / 100).toLocaleString('en-CA')}
                       </p>
                     </div>
@@ -665,6 +692,7 @@ export function HubClient({ locale }: HubClientProps) {
           { label: 'MEDIUM_THREATS',   value: medCount.toString(),                                       color: '#FFB830' },
           { label: 'PROJECTED_REV',    value: `$${(projectedRevenue / 100).toLocaleString('en-CA')}`,   color: '#4A9EFF' },
           { label: 'STRIKES_STAGED',   value: strikes.filter((s) => s.status === 'STAGED').length.toString(), color: '#39FF14' },
+          { label: 'BOUNTIES_PAID',   value: strikes.filter((s) => s.status === 'BOUNTY_PAID').length.toString(), color: '#39FF14' },
         ].map((stat) => (
           <div key={stat.label} className="flex-1 min-w-0">
             <p className="text-[9px] tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>{stat.label}</p>

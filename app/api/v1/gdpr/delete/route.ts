@@ -26,18 +26,28 @@ export async function DELETE(request: NextRequest) {
     );
   }
 
-  const userId = session.user.id;
+  const userId    = session.user.id;
+  const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0].trim()
+    ?? request.headers.get('x-real-ip')
+    ?? null;
 
   const admin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  const deletionLog: string[] = [];
-  const errors: string[] = [];
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = admin as any;
+
+  const { data: auditRow } = await sb
+    .from('gdpr_audit')
+    .insert({ user_id: userId, status: 'pending', ip_address: ipAddress })
+    .select('id')
+    .maybeSingle();
+  const auditId: string | null = auditRow?.id ?? null;
+
+  const deletionLog: string[] = [];
+  const errors: string[]      = [];
 
   const { data: userStrikes } = await sb
     .from('strikes')
@@ -82,13 +92,25 @@ export async function DELETE(request: NextRequest) {
   if (authErr) errors.push(`auth user: ${authErr.message}`);
   else deletionLog.push('auth user');
 
+  const finalStatus = errors.length === 0 ? 'completed' : deletionLog.length > 0 ? 'partial' : 'failed';
+  const timestamp   = new Date().toISOString();
+
+  if (auditId) {
+    await sb
+      .from('gdpr_audit')
+      .update({ status: finalStatus, deleted: deletionLog, errors })
+      .eq('id', auditId);
+  }
+
   if (errors.length > 0) {
     return NextResponse.json(
       {
         success: false,
         deleted: deletionLog,
         errors,
+        audit_id: auditId,
         message: 'Partial deletion completed. Some records could not be removed — contact support.',
+        timestamp,
       },
       { status: 207 }
     );
@@ -97,7 +119,8 @@ export async function DELETE(request: NextRequest) {
   return NextResponse.json({
     success: true,
     deleted: deletionLog,
+    audit_id: auditId,
     message: 'All personal data has been permanently deleted per your GDPR/Loi 25 right to erasure request.',
-    timestamp: new Date().toISOString(),
+    timestamp,
   });
 }
