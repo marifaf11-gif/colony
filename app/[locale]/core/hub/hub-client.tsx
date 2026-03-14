@@ -276,10 +276,18 @@ export function HubClient({ locale }: HubClientProps) {
   useEffect(() => {
     loadStrikes();
     const sb = createClient();
+
+    sb.from('app_state').select('is_scanning').eq('id', 1).maybeSingle()
+      .then(({ data }) => { if (data) setScanning((data as unknown as { is_scanning: boolean }).is_scanning); });
+
     const ch = sb
-      .channel('strikes-rt')
+      .channel('hub-rt')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'strikes' }, loadStrikes)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'app_state' }, ({ new: row }) => {
+        setScanning((row as { is_scanning: boolean }).is_scanning ?? false);
+      })
       .subscribe();
+
     return () => { sb.removeChannel(ch); };
   }, [loadStrikes]);
 
