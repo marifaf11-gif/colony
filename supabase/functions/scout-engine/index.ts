@@ -8,21 +8,26 @@ const corsHeaders = {
 };
 
 const MTL_BUSINESSES = [
-  { company_name: "Plomberie Élite Montréal",    website: "https://plomberie-elite-mtl.ca",   contact_email: "info@plomberie-elite-mtl.ca",   sector: "Construction" },
-  { company_name: "Réno Expert QC",               website: "https://reno-expert-qc.ca",         contact_email: "contact@reno-expert-qc.ca",       sector: "Construction" },
-  { company_name: "Menuiserie Artisans MTL",       website: "https://menuiserie-artisans-mtl.com",contact_email: "bonjour@menuiserie-artisans-mtl.com",sector:"Construction"},
-  { company_name: "Vitrier Rapide 24/7",           website: "https://vitrier-rapide.ca",         contact_email: "info@vitrier-rapide.ca",          sector: "Construction" },
-  { company_name: "Électro Pro Québec",            website: "https://electro-pro-qc.com",        contact_email: "service@electro-pro-qc.com",      sector: "Construction" },
-  { company_name: "Chauffage MTL Services",        website: "https://chauffage-mtl.ca",          contact_email: "hello@chauffage-mtl.ca",          sector: "Construction" },
-  { company_name: "Toiture Pro Québec",            website: "https://toiture-pro-qc.ca",         contact_email: "quotes@toiture-pro-qc.ca",        sector: "Construction" },
-  { company_name: "Isolation Ici Inc.",            website: "https://isolation-ici.com",         contact_email: "info@isolation-ici.com",          sector: "Construction" },
-  { company_name: "Pose Plancher MTL",             website: "https://pose-plancher-mtl.ca",      contact_email: "contact@pose-plancher-mtl.ca",    sector: "Construction" },
-  { company_name: "Serrurier 24h Montréal",        website: "https://serrurier-24h-mtl.ca",      contact_email: "urgence@serrurier-24h-mtl.ca",    sector: "Construction" },
-  { company_name: "DevSoft Montréal Inc.",         website: "https://devsoft-montreal.com",      contact_email: "hello@devsoft-montreal.com",      sector: "Software" },
-  { company_name: "Agence Web Créativité",         website: "https://agence-web-creativite.ca",  contact_email: "projets@agence-web-creativite.ca",sector: "Software" },
-  { company_name: "CloudStack Québec",             website: "https://cloudstack-qc.io",          contact_email: "tech@cloudstack-qc.io",           sector: "Software" },
-  { company_name: "NumériQC Solutions",            website: "https://numeriqc-solutions.com",    contact_email: "info@numeriqc-solutions.com",     sector: "Software" },
-  { company_name: "PixelForge Studio MTL",         website: "https://pixelforge-mtl.com",        contact_email: "studio@pixelforge-mtl.com",       sector: "Software" },
+  { company_name: "Plomberie Élite Montréal",    website: "https://plomberie-elite-mtl.ca",      contact_email: "info@plomberie-elite-mtl.ca",        sector: "Construction" },
+  { company_name: "Réno Expert QC",               website: "https://reno-expert-qc.ca",           contact_email: "contact@reno-expert-qc.ca",          sector: "Construction" },
+  { company_name: "Menuiserie Artisans MTL",       website: "https://menuiserie-artisans-mtl.com", contact_email: "bonjour@menuiserie-artisans-mtl.com", sector: "Construction" },
+  { company_name: "Vitrier Rapide 24/7",           website: "https://vitrier-rapide.ca",           contact_email: "info@vitrier-rapide.ca",             sector: "Construction" },
+  { company_name: "Électro Pro Québec",            website: "https://electro-pro-qc.com",          contact_email: "service@electro-pro-qc.com",         sector: "Construction" },
+  { company_name: "Chauffage MTL Services",        website: "https://chauffage-mtl.ca",            contact_email: "hello@chauffage-mtl.ca",             sector: "Construction" },
+  { company_name: "Toiture Pro Québec",            website: "https://toiture-pro-qc.ca",           contact_email: "quotes@toiture-pro-qc.ca",           sector: "Construction" },
+  { company_name: "Isolation Ici Inc.",            website: "https://isolation-ici.com",           contact_email: "info@isolation-ici.com",             sector: "Construction" },
+  { company_name: "Pose Plancher MTL",             website: "https://pose-plancher-mtl.ca",        contact_email: "contact@pose-plancher-mtl.ca",       sector: "Construction" },
+  { company_name: "Serrurier 24h Montréal",        website: "https://serrurier-24h-mtl.ca",        contact_email: "urgence@serrurier-24h-mtl.ca",       sector: "Construction" },
+  { company_name: "DevSoft Montréal Inc.",         website: "https://devsoft-montreal.com",        contact_email: "hello@devsoft-montreal.com",         sector: "Software" },
+  { company_name: "Agence Web Créativité",         website: "https://agence-web-creativite.ca",    contact_email: "projets@agence-web-creativite.ca",   sector: "Software" },
+  { company_name: "CloudStack Québec",             website: "https://cloudstack-qc.io",            contact_email: "tech@cloudstack-qc.io",              sector: "Software" },
+  { company_name: "NumériQC Solutions",            website: "https://numeriqc-solutions.com",      contact_email: "info@numeriqc-solutions.com",        sector: "Software" },
+  { company_name: "PixelForge Studio MTL",         website: "https://pixelforge-mtl.com",          contact_email: "studio@pixelforge-mtl.com",          sector: "Software" },
+  { company_name: "Cabinet Dentaire Lafleur",      website: "https://dentaire-lafleur.ca",         contact_email: "reception@dentaire-lafleur.ca",      sector: "Healthcare" },
+  { company_name: "Clinique Physio MTL",           website: "https://clinique-physio-mtl.com",     contact_email: "info@clinique-physio-mtl.com",       sector: "Healthcare" },
+  { company_name: "Pharmacie Quartier Latin",      website: "https://pharma-quartier-latin.ca",    contact_email: "commandes@pharma-quartier-latin.ca", sector: "Healthcare" },
+  { company_name: "Restaurant Le Bouchon",         website: "https://restaurant-lebouchon.ca",     contact_email: "reservations@restaurant-lebouchon.ca", sector: "Food & Beverage" },
+  { company_name: "Boulangerie Artisanale MTL",    website: "https://boulangerie-artisanale.ca",   contact_email: "bonjour@boulangerie-artisanale.ca",  sector: "Food & Beverage" },
 ];
 
 const TECH_STACKS: string[][] = [
@@ -58,7 +63,11 @@ function computeSeverity(gaps: string[]): { severity: "HIGH" | "MEDIUM" | "LOW";
   return                       { severity: "LOW",    revenue_value: 1000 * 100 };
 }
 
-function buildEmailDraft(business: typeof MTL_BUSINESSES[0], gaps: string[], severity: string): string {
+function buildEmailDraft(
+  business: { company_name: string; website: string },
+  gaps: string[],
+  severity: string
+): string {
   const gapList = gaps.slice(0, 3).map((g) => `  • ${g}`).join("\n");
   return `Objet : Votre site ${business.website} présente des risques de conformité Loi 25
 
@@ -82,10 +91,86 @@ Cordialement,
 `;
 }
 
+async function runScan(
+  supabase: ReturnType<typeof createClient>,
+  sector: string,
+  correlationId: string
+): Promise<{ inserted: number; skipped: number; records: unknown[] }> {
+  const pool = sector === "all"
+    ? MTL_BUSINESSES
+    : MTL_BUSINESSES.filter((b) => b.sector.toLowerCase() === sector.toLowerCase());
+
+  const sample = pickRandom(pool, Math.min(5, pool.length));
+  const inserted: unknown[] = [];
+  let skipped = 0;
+
+  for (const biz of sample) {
+    const { data: existing } = await supabase
+      .from("strikes")
+      .select("id")
+      .eq("website", biz.website)
+      .maybeSingle();
+
+    if (existing) {
+      skipped++;
+      continue;
+    }
+
+    const techStack = pickRandom(TECH_STACKS, 1)[0];
+    const gaps      = pickRandom(LOI25_GAPS, Math.floor(Math.random() * 6) + 2);
+    const { severity, revenue_value } = computeSeverity(gaps);
+    const emailDraft = buildEmailDraft(biz, gaps, severity);
+
+    const { data, error } = await supabase
+      .from("strikes")
+      .insert({
+        company_name:  biz.company_name,
+        website:       biz.website,
+        contact_email: biz.contact_email,
+        sector:        biz.sector,
+        city:          "Montreal",
+        tech_stack:    techStack,
+        loi25_gaps:    gaps,
+        severity,
+        revenue_value,
+        status:        "AUDITED",
+        audit_data:    {
+          tech_stack: techStack,
+          gaps_count: gaps.length,
+          scanned_at: new Date().toISOString(),
+          correlation_id: correlationId,
+        },
+        email_draft: emailDraft,
+      })
+      .select("id, company_name, website, severity, revenue_value")
+      .maybeSingle();
+
+    if (error) {
+      console.log(JSON.stringify({ event: "scout-insert-error", correlationId, website: biz.website, error: error.message }));
+      continue;
+    }
+
+    if (data) {
+      inserted.push(data);
+      await supabase.from("notifications").insert({
+        type: "discord",
+        payload: {
+          content: `[SCOUT] New target: **${biz.company_name}** | Severity: ${severity} | Bounty: $${(revenue_value / 100).toLocaleString("en-CA")} CAD`,
+        },
+      });
+    }
+  }
+
+  return { inserted: inserted.length, skipped, records: inserted };
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
+
+  const correlationId = crypto.randomUUID();
+  console.log(JSON.stringify({ event: "scout-engine-start", correlationId, method: req.method }));
 
   try {
     const supabase = createClient(
@@ -98,64 +183,24 @@ Deno.serve(async (req: Request) => {
     const sector = url.searchParams.get("sector") ?? "all";
 
     if (action === "scan") {
-      const pool = sector === "all"
-        ? MTL_BUSINESSES
-        : MTL_BUSINESSES.filter((b) => b.sector.toLowerCase() === sector.toLowerCase());
+      const result = await runScan(supabase, sector, correlationId);
+      console.log(JSON.stringify({ event: "scout-scan-complete", correlationId, ...result }));
 
-      const sample = pickRandom(pool, Math.min(4, pool.length));
-      const inserted: unknown[] = [];
-
-      for (const biz of sample) {
-        const { data: existing } = await supabase
-          .from("strikes")
-          .select("id")
-          .eq("website", biz.website)
-          .maybeSingle();
-
-        if (existing) continue;
-
-        const techStack = pickRandom(TECH_STACKS, 1)[0];
-        const gaps      = pickRandom(LOI25_GAPS, Math.floor(Math.random() * 6) + 2);
-        const { severity, revenue_value } = computeSeverity(gaps);
-        const emailDraft = buildEmailDraft(biz, gaps, severity);
-
-        const { data } = await supabase
-          .from("strikes")
-          .insert({
-            company_name:  biz.company_name,
-            website:       biz.website,
-            contact_email: biz.contact_email,
-            sector:        biz.sector,
-            city:          "Montreal",
-            tech_stack:    techStack,
-            loi25_gaps:    gaps,
-            severity,
-            revenue_value,
-            status:        "AUDITED",
-            audit_data:    { tech_stack: techStack, gaps_count: gaps.length, scanned_at: new Date().toISOString() },
-            email_draft:   emailDraft,
-          })
-          .select("id, company_name, website, severity, revenue_value")
-          .maybeSingle();
-
-        if (data) inserted.push(data);
-      }
-
-      return new Response(JSON.stringify({ success: true, inserted: inserted.length, records: inserted }), {
+      return new Response(JSON.stringify({ success: true, correlationId, ...result }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (action === "audit" && req.method === "POST") {
-      const body       = await req.json();
-      const strikeId   = body.strike_id as string;
+      const body     = await req.json();
+      const strikeId = body.strike_id as string;
       if (!strikeId) return new Response("Missing strike_id", { status: 400, headers: corsHeaders });
 
       const { data: strike } = await supabase.from("strikes").select("*").eq("id", strikeId).maybeSingle();
       if (!strike) return new Response("Strike not found", { status: 404, headers: corsHeaders });
 
-      const deepGaps   = pickRandom(LOI25_GAPS, Math.floor(Math.random() * 4) + 3);
-      const techStack  = pickRandom(TECH_STACKS, 1)[0];
+      const deepGaps  = pickRandom(LOI25_GAPS, Math.floor(Math.random() * 4) + 3);
+      const techStack = pickRandom(TECH_STACKS, 1)[0];
       const { severity, revenue_value } = computeSeverity(deepGaps);
 
       await supabase.from("strikes").update({
@@ -164,17 +209,20 @@ Deno.serve(async (req: Request) => {
         severity,
         revenue_value,
         status:      "AUDITED",
-        audit_data:  { ...strike.audit_data, deep_audit: true, audited_at: new Date().toISOString() },
+        audit_data:  { ...strike.audit_data, deep_audit: true, audited_at: new Date().toISOString(), correlation_id: correlationId },
       }).eq("id", strikeId);
 
-      return new Response(JSON.stringify({ success: true, severity, gaps: deepGaps, tech_stack: techStack }), {
+      console.log(JSON.stringify({ event: "scout-deep-audit", correlationId, strikeId, severity }));
+
+      return new Response(JSON.stringify({ success: true, correlationId, severity, gaps: deepGaps, tech_stack: techStack }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     return new Response(JSON.stringify({ error: "Unknown action" }), { status: 400, headers: corsHeaders });
   } catch (err) {
-    return new Response(JSON.stringify({ error: String(err) }), {
+    console.log(JSON.stringify({ event: "scout-engine-error", correlationId, error: String(err) }));
+    return new Response(JSON.stringify({ error: String(err), correlationId }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

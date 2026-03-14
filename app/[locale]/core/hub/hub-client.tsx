@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { RadarScanner, type RadarBlip } from '@/components/colony/radar-scanner';
 import { CncToggle } from '@/components/colony/cnc-toggle';
 import { FleetTelemetryFeed } from '@/components/colony/fleet-telemetry-feed';
-import { Zap, Eye, Activity, TrendingUp, TriangleAlert as AlertTriangle, ChevronRight, Crosshair, Radio, Server, Shield, Search, X, ExternalLink, Mail, MessageSquare, Loader as Loader2 } from 'lucide-react';
+import { Zap, Eye, Activity, TrendingUp, ChevronRight, Crosshair, Radio, Server, Shield, Search, X, ExternalLink, Mail, MessageSquare, Loader as Loader2, CreditCard, Filter } from 'lucide-react';
 
 interface HubClientProps { locale: string }
 
@@ -83,7 +83,8 @@ function LiveIndicator({ color = '#39FF14' }: { color?: string }) {
 }
 
 function AuditModal({ strike, onClose, onStrike }: { strike: StrikeRow; onClose: () => void; onStrike: (id: string) => void }) {
-  const [striking, setStriking] = useState(false);
+  const [striking, setStriking]         = useState(false);
+  const [checkingOut, setCheckingOut]   = useState(false);
   const [strikeResult, setStrikeResult] = useState<{ gmail_draft_link?: string; whatsapp_link?: string } | null>(null);
   const col = SEVERITY_COLOR[strike.severity] ?? '#39FF14';
 
@@ -106,6 +107,23 @@ function AuditModal({ strike, onClose, onStrike }: { strike: StrikeRow; onClose:
     } finally {
       setStriking(false);
     }
+  };
+
+  const handleCheckout = async () => {
+    setCheckingOut(true);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ strike_id: strike.id }),
+      });
+      const data = await res.json();
+      if (data.url) window.open(data.url, '_blank');
+    } catch { /* silent */ }
+    finally { setCheckingOut(false); }
   };
 
   return (
@@ -182,7 +200,7 @@ function AuditModal({ strike, onClose, onStrike }: { strike: StrikeRow; onClose:
           {strikeResult ? (
             <div style={{ background: 'rgba(57,255,20,0.06)', border: '1px solid rgba(57,255,20,0.2)', borderRadius: 8, padding: '14px' }}>
               <p className="text-[9px] font-bold tracking-widest uppercase mb-3" style={{ color: '#39FF14' }}>EMAIL STAGED — READY TO SEND</p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {strikeResult.gmail_draft_link && (
                   <a href={strikeResult.gmail_draft_link} target="_blank" rel="noreferrer"
                     className="flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-bold tracking-wider transition-all hover:scale-105"
@@ -199,17 +217,35 @@ function AuditModal({ strike, onClose, onStrike }: { strike: StrikeRow; onClose:
                     WHATSAPP
                   </a>
                 )}
+                <button
+                  onClick={handleCheckout}
+                  disabled={checkingOut}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-bold tracking-wider transition-all hover:scale-105 disabled:opacity-50"
+                  style={{ background: 'rgba(57,255,20,0.1)', border: '1px solid rgba(57,255,20,0.3)', color: '#39FF14' }}>
+                  {checkingOut ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CreditCard className="w-3.5 h-3.5" />}
+                  SEND $299 INVOICE
+                </button>
               </div>
             </div>
           ) : (
-            <button
-              onClick={handleStrike}
-              disabled={striking}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-[11px] font-bold tracking-widest uppercase transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ background: 'linear-gradient(135deg, #3a0d0d, #5a1a1a)', border: '1px solid rgba(255,59,59,0.4)', color: '#FF3B3B', boxShadow: '0 0 20px rgba(255,59,59,0.15)' }}>
-              {striking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crosshair className="w-4 h-4" />}
-              {striking ? 'STAGING STRIKE...' : 'EXECUTE STRIKE — STAGE EMAIL'}
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={handleStrike}
+                disabled={striking}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-[11px] font-bold tracking-widest uppercase transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ background: 'linear-gradient(135deg, #3a0d0d, #5a1a1a)', border: '1px solid rgba(255,59,59,0.4)', color: '#FF3B3B', boxShadow: '0 0 20px rgba(255,59,59,0.15)' }}>
+                {striking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crosshair className="w-4 h-4" />}
+                {striking ? 'STAGING STRIKE...' : 'EXECUTE STRIKE — STAGE EMAIL'}
+              </button>
+              <button
+                onClick={handleCheckout}
+                disabled={checkingOut}
+                className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-all hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ background: 'rgba(57,255,20,0.06)', border: '1px solid rgba(57,255,20,0.2)', color: '#39FF14' }}>
+                {checkingOut ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CreditCard className="w-3.5 h-3.5" />}
+                {checkingOut ? 'CREATING INVOICE...' : 'SEND $299 STRIPE INVOICE'}
+              </button>
+            </div>
           )}
         </div>
       </MetalPanel>
@@ -218,14 +254,14 @@ function AuditModal({ strike, onClose, onStrike }: { strike: StrikeRow; onClose:
 }
 
 export function HubClient({ locale }: HubClientProps) {
-  const [strikes, setStrikes]         = useState<StrikeRow[]>([]);
-  const [podToggles, setPodToggles]   = useState<Record<string, boolean>>({
+  const [strikes, setStrikes]               = useState<StrikeRow[]>([]);
+  const [podToggles, setPodToggles]         = useState<Record<string, boolean>>({
     'cyberhawk': true, 'conversion-catalyst': true, 'scout': false, 'kaltrac-v2': false,
   });
-  const [scanning, setScanning]       = useState(false);
+  const [scanning, setScanning]             = useState(false);
   const [selectedStrike, setSelectedStrike] = useState<StrikeRow | null>(null);
   const [highlightedBlipId, setHighlightedBlipId] = useState<string | null>(null);
-  const scoutTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [severityFilter, setSeverityFilter] = useState<'ALL' | 'HIGH' | 'MEDIUM' | 'LOW'>('ALL');
 
   const loadStrikes = useCallback(async () => {
     const sb = createClient();
@@ -261,12 +297,26 @@ export function HubClient({ locale }: HubClientProps) {
   useEffect(() => {
     if (podToggles['scout']) {
       runScout();
-      scoutTimerRef.current = setInterval(runScout, 45000);
-    } else {
-      if (scoutTimerRef.current) clearInterval(scoutTimerRef.current);
     }
-    return () => { if (scoutTimerRef.current) clearInterval(scoutTimerRef.current); };
-  }, [podToggles['scout'], runScout]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [podToggles['scout']]);
+
+  const exportCsv = useCallback(() => {
+    const header = 'company_name,website,sector,severity,revenue_value,status,created_at';
+    const rows = strikes.map((s) =>
+      [s.company_name, s.website, s.sector, s.severity, (s.revenue_value / 100).toFixed(2), s.status, s.created_at]
+        .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+        .join(',')
+    );
+    const csv  = [header, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `strikes-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [strikes]);
 
   const handleBlipClick = useCallback((blipId: string) => {
     const strike = strikes.find((s) => s.id === blipId);
@@ -280,6 +330,10 @@ export function HubClient({ locale }: HubClientProps) {
     await loadStrikes();
     setHighlightedBlipId(null);
   }, [loadStrikes]);
+
+  const filteredStrikes = severityFilter === 'ALL'
+    ? strikes
+    : strikes.filter((s) => s.severity === severityFilter);
 
   const radarBlips: RadarBlip[] = strikes.map((s, i) => ({
     id:       s.id,
@@ -445,15 +499,39 @@ export function HubClient({ locale }: HubClientProps) {
 
         <div className="col-span-4 space-y-4">
           <MetalPanel className="p-4" accent="#FF3B3B">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-2">
               <Search className="w-3.5 h-3.5" style={{ color: '#FFB830' }} />
               <p className="text-[9px] font-bold tracking-[0.22em] uppercase" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                LIVE_STRIKES {strikes.length > 0 && `(${strikes.length})`}
+                LIVE_STRIKES {strikes.length > 0 && `(${filteredStrikes.length}/${strikes.length})`}
               </p>
-              {scanning && <Loader2 className="w-3 h-3 animate-spin ml-auto" style={{ color: '#FFB830' }} />}
+              {scanning && <Loader2 className="w-3 h-3 animate-spin" style={{ color: '#FFB830' }} />}
+              <button onClick={exportCsv} title="Export CSV"
+                className="ml-auto flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold tracking-wider transition-all hover:opacity-80"
+                style={{ background: 'rgba(74,158,255,0.1)', border: '1px solid rgba(74,158,255,0.2)', color: '#4A9EFF' }}>
+                <TrendingUp className="w-2.5 h-2.5" />
+                CSV
+              </button>
             </div>
-            <div className="space-y-1.5 max-h-[260px] overflow-y-auto">
-              {strikes.length > 0 ? strikes.slice(0, 8).map((s) => {
+            <div className="flex gap-1 mb-2">
+              {(['ALL', 'HIGH', 'MEDIUM', 'LOW'] as const).map((sev) => {
+                const sevColor = sev === 'HIGH' ? '#FF3B3B' : sev === 'MEDIUM' ? '#FFB830' : sev === 'LOW' ? '#39FF14' : 'rgba(255,255,255,0.4)';
+                const active   = severityFilter === sev;
+                return (
+                  <button key={sev} onClick={() => setSeverityFilter(sev)}
+                    className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold tracking-widest transition-all"
+                    style={{
+                      color:      active ? (sev === 'ALL' ? '#fff' : sevColor) : 'rgba(255,255,255,0.25)',
+                      background: active ? (sev === 'ALL' ? 'rgba(255,255,255,0.08)' : `${sevColor}15`) : 'transparent',
+                      border:     `1px solid ${active ? (sev === 'ALL' ? 'rgba(255,255,255,0.15)' : `${sevColor}35`) : 'rgba(255,255,255,0.06)'}`,
+                    }}>
+                    {sev !== 'ALL' && <Filter className="w-2 h-2" />}
+                    {sev}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="space-y-1.5 max-h-[220px] overflow-y-auto">
+              {filteredStrikes.length > 0 ? filteredStrikes.slice(0, 8).map((s) => {
                 const col = SEVERITY_COLOR[s.severity] ?? '#39FF14';
                 return (
                   <button key={s.id}
@@ -479,7 +557,7 @@ export function HubClient({ locale }: HubClientProps) {
               }) : (
                 <div className="py-6 text-center">
                   <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
-                    Toggle SCOUT_ENGINE to populate targets
+                    {strikes.length > 0 ? `No ${severityFilter} targets` : 'Toggle SCOUT_ENGINE to populate targets'}
                   </p>
                 </div>
               )}
