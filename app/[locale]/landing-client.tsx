@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Shield, Zap, Eye, Radio, Crosshair, ChevronRight, TrendingUp, Lock, Globe, BarChart3, ArrowRight, Activity } from 'lucide-react';
+import { Shield, Zap, Eye, Radio, Crosshair, ChevronRight, TrendingUp, Lock, Globe, ChartBar as BarChart3, ArrowRight, Activity } from 'lucide-react';
 
 interface LandingStats {
   totalStrikes: number;
