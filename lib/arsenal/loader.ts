@@ -6,7 +6,9 @@ export interface ArsenalTool {
   description: string;
   category: string;
   endpoint: string;
+  endpoint_config: Record<string, unknown> | null;
   rating: number;
+  success_rate: number;
   tags: string[];
 }
 
@@ -16,7 +18,9 @@ const SEED_TOOLS: Omit<ArsenalTool, 'id'>[] = [
     description: 'Find professional email addresses for any domain. Best for B2B prospecting.',
     category: 'email',
     endpoint: 'https://api.hunter.io/v2',
+    endpoint_config: { version: 'v2', auth: 'api_key' },
     rating: 4.8,
+    success_rate: 0.94,
     tags: ['email', 'prospecting', 'b2b', 'lead-gen'],
   },
   {
@@ -24,7 +28,9 @@ const SEED_TOOLS: Omit<ArsenalTool, 'id'>[] = [
     description: 'Search 275M+ contacts with filters for industry, title, company size.',
     category: 'enrichment',
     endpoint: 'https://api.apollo.io/v1',
+    endpoint_config: { version: 'v1', auth: 'api_key' },
     rating: 4.7,
+    success_rate: 0.91,
     tags: ['contacts', 'enrichment', 'email', 'phone'],
   },
   {
@@ -32,7 +38,9 @@ const SEED_TOOLS: Omit<ArsenalTool, 'id'>[] = [
     description: 'Real-time company and person enrichment from email or domain.',
     category: 'enrichment',
     endpoint: 'https://company.clearbit.com/v2',
+    endpoint_config: { version: 'v2', auth: 'bearer' },
     rating: 4.6,
+    success_rate: 0.89,
     tags: ['enrichment', 'company', 'firmographic'],
   },
   {
@@ -40,7 +48,9 @@ const SEED_TOOLS: Omit<ArsenalTool, 'id'>[] = [
     description: 'Extract LinkedIn profiles, connections, and company employees at scale.',
     category: 'scraping',
     endpoint: 'https://api.phantombuster.com/api/v2',
+    endpoint_config: { version: 'v2', auth: 'x-phantombuster-key' },
     rating: 4.5,
+    success_rate: 0.87,
     tags: ['linkedin', 'scraping', 'social', 'outreach'],
   },
   {
@@ -48,7 +58,9 @@ const SEED_TOOLS: Omit<ArsenalTool, 'id'>[] = [
     description: 'Rotating proxy scraping API. Bypass anti-bot measures, render JS.',
     category: 'scraping',
     endpoint: 'https://api.scraperapi.com',
+    endpoint_config: { auth: 'api_key', render: true },
     rating: 4.3,
+    success_rate: 0.85,
     tags: ['scraping', 'proxy', 'web', 'javascript'],
   },
   {
@@ -56,7 +68,9 @@ const SEED_TOOLS: Omit<ArsenalTool, 'id'>[] = [
     description: 'Find local businesses, addresses, phone numbers, and ratings by category and location.',
     category: 'geo-intelligence',
     endpoint: 'https://maps.googleapis.com/maps/api/place',
+    endpoint_config: { auth: 'api_key', format: 'json' },
     rating: 4.9,
+    success_rate: 0.98,
     tags: ['local', 'geo', 'business', 'phone', 'email'],
   },
   {
@@ -64,7 +78,9 @@ const SEED_TOOLS: Omit<ArsenalTool, 'id'>[] = [
     description: 'Identify technologies used on any website: CMS, analytics, payments, hosting.',
     category: 'tech-intelligence',
     endpoint: 'https://api.builtwith.com/v21/api.json',
+    endpoint_config: { version: 'v21', auth: 'api_key' },
     rating: 4.7,
+    success_rate: 0.93,
     tags: ['tech-stack', 'cms', 'analytics', 'intelligence'],
   },
   {
@@ -72,7 +88,9 @@ const SEED_TOOLS: Omit<ArsenalTool, 'id'>[] = [
     description: 'Detect web technologies, frameworks, and libraries on target domains.',
     category: 'tech-intelligence',
     endpoint: 'https://api.wappalyzer.com/v2',
+    endpoint_config: { version: 'v2', auth: 'x-api-key' },
     rating: 4.4,
+    success_rate: 0.88,
     tags: ['tech-stack', 'detection', 'frameworks'],
   },
   {
@@ -80,7 +98,9 @@ const SEED_TOOLS: Omit<ArsenalTool, 'id'>[] = [
     description: 'Historical DNS data, subdomains, associated domains, and WHOIS information.',
     category: 'security',
     endpoint: 'https://api.securitytrails.com/v1',
+    endpoint_config: { version: 'v1', auth: 'apikey' },
     rating: 4.6,
+    success_rate: 0.92,
     tags: ['dns', 'security', 'subdomains', 'recon'],
   },
   {
@@ -88,7 +108,9 @@ const SEED_TOOLS: Omit<ArsenalTool, 'id'>[] = [
     description: 'Search internet-connected devices. Find exposed ports, services, vulnerabilities.',
     category: 'security',
     endpoint: 'https://api.shodan.io',
+    endpoint_config: { auth: 'key', streaming: false },
     rating: 4.8,
+    success_rate: 0.95,
     tags: ['security', 'iot', 'ports', 'vulnerabilities', 'recon'],
   },
   {
@@ -96,7 +118,9 @@ const SEED_TOOLS: Omit<ArsenalTool, 'id'>[] = [
     description: 'Google Core Web Vitals analysis: LCP, CLS, INP scores and improvement recommendations.',
     category: 'performance',
     endpoint: 'https://www.googleapis.com/pagespeedonline/v5',
+    endpoint_config: { version: 'v5', auth: 'api_key', strategy: 'mobile' },
     rating: 4.9,
+    success_rate: 0.99,
     tags: ['performance', 'vitals', 'seo', 'speed', 'lcp', 'cls'],
   },
   {
@@ -104,7 +128,9 @@ const SEED_TOOLS: Omit<ArsenalTool, 'id'>[] = [
     description: 'SEO metrics: backlinks, domain rating, organic traffic, keyword rankings.',
     category: 'seo',
     endpoint: 'https://apiv2.ahrefs.com',
+    endpoint_config: { version: 'v2', auth: 'bearer' },
     rating: 4.8,
+    success_rate: 0.93,
     tags: ['seo', 'backlinks', 'keywords', 'traffic', 'authority'],
   },
   {
@@ -112,7 +138,9 @@ const SEED_TOOLS: Omit<ArsenalTool, 'id'>[] = [
     description: 'Domain Authority, Page Authority, and spam scores for any URL.',
     category: 'seo',
     endpoint: 'https://lsapi.seomoz.com/v2',
+    endpoint_config: { version: 'v2', auth: 'basic' },
     rating: 4.5,
+    success_rate: 0.90,
     tags: ['seo', 'authority', 'domain', 'spam'],
   },
   {
@@ -120,7 +148,9 @@ const SEED_TOOLS: Omit<ArsenalTool, 'id'>[] = [
     description: 'Transactional and marketing email delivery at scale with analytics.',
     category: 'outreach',
     endpoint: 'https://api.sendgrid.com/v3',
+    endpoint_config: { version: 'v3', auth: 'bearer' },
     rating: 4.7,
+    success_rate: 0.97,
     tags: ['email', 'outreach', 'transactional', 'delivery'],
   },
   {
@@ -128,7 +158,9 @@ const SEED_TOOLS: Omit<ArsenalTool, 'id'>[] = [
     description: 'Generate no-code payment links for products and services instantly.',
     category: 'payments',
     endpoint: 'https://api.stripe.com/v1/payment_links',
+    endpoint_config: { version: 'v1', auth: 'bearer', idempotent: true },
     rating: 5.0,
+    success_rate: 1.0,
     tags: ['payments', 'stripe', 'invoicing', 'checkout'],
   },
 ];

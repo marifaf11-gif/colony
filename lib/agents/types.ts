@@ -28,12 +28,16 @@ export interface TerminalLog {
 export interface VulnerabilityLog {
   id: string;
   target_url: string;
+  target_name: string | null;
+  vulnerability_type: string | null;
   kink_type: string;
   title: string;
   description: string;
-  severity: 'Critical' | 'High' | 'Medium' | 'Low';
+  severity: string;
   impact_estimate: number;
-  status: 'pending' | 'hawk_processing' | 'report_sent' | 'invoiced';
+  status: string;
+  raw_data: Record<string, unknown> | null;
+  hound_id: string | null;
   golden_ticket_html: string | null;
   stripe_remediation_link: string | null;
   discord_message_id: string | null;

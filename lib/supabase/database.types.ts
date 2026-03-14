@@ -88,7 +88,9 @@ export interface Database {
           description: string;
           category: string;
           endpoint: string;
+          endpoint_config: Json | null;
           rating: number;
+          success_rate: number;
           tags: string[];
           embedding: unknown | null;
           created_at: string;
@@ -99,7 +101,9 @@ export interface Database {
           description?: string;
           category?: string;
           endpoint?: string;
+          endpoint_config?: Json | null;
           rating?: number;
+          success_rate?: number;
           tags?: string[];
           embedding?: unknown | null;
           created_at?: string;
@@ -110,7 +114,9 @@ export interface Database {
           description?: string;
           category?: string;
           endpoint?: string;
+          endpoint_config?: Json | null;
           rating?: number;
+          success_rate?: number;
           tags?: string[];
           embedding?: unknown | null;
           created_at?: string;
@@ -120,12 +126,16 @@ export interface Database {
         Row: {
           id: string;
           target_url: string;
+          target_name: string | null;
+          vulnerability_type: string | null;
           kink_type: string;
           title: string;
           description: string;
           severity: string;
           impact_estimate: number;
           status: string;
+          raw_data: Json | null;
+          hound_id: string | null;
           golden_ticket_html: string | null;
           stripe_remediation_link: string | null;
           discord_message_id: string | null;
@@ -137,12 +147,16 @@ export interface Database {
         Insert: {
           id?: string;
           target_url: string;
+          target_name?: string | null;
+          vulnerability_type?: string | null;
           kink_type?: string;
           title: string;
           description?: string;
           severity?: string;
           impact_estimate?: number;
           status?: string;
+          raw_data?: Json | null;
+          hound_id?: string | null;
           golden_ticket_html?: string | null;
           stripe_remediation_link?: string | null;
           discord_message_id?: string | null;
@@ -154,12 +168,16 @@ export interface Database {
         Update: {
           id?: string;
           target_url?: string;
+          target_name?: string | null;
+          vulnerability_type?: string | null;
           kink_type?: string;
           title?: string;
           description?: string;
           severity?: string;
           impact_estimate?: number;
           status?: string;
+          raw_data?: Json | null;
+          hound_id?: string | null;
           golden_ticket_html?: string | null;
           stripe_remediation_link?: string | null;
           discord_message_id?: string | null;
