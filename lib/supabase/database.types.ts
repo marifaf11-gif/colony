@@ -215,6 +215,59 @@ export interface Database {
           created_at?: string;
         };
       };
+      strikes: {
+        Row: {
+          id: string;
+          company_name: string;
+          website: string;
+          contact_email: string | null;
+          sector: string;
+          city: string;
+          tech_stack: string[];
+          loi25_gaps: string[];
+          severity: string;
+          revenue_value: number;
+          status: string;
+          audit_data: Json;
+          email_draft: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_name?: string;
+          website?: string;
+          contact_email?: string | null;
+          sector?: string;
+          city?: string;
+          tech_stack?: string[];
+          loi25_gaps?: string[];
+          severity?: string;
+          revenue_value?: number;
+          status?: string;
+          audit_data?: Json;
+          email_draft?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_name?: string;
+          website?: string;
+          contact_email?: string | null;
+          sector?: string;
+          city?: string;
+          tech_stack?: string[];
+          loi25_gaps?: string[];
+          severity?: string;
+          revenue_value?: number;
+          status?: string;
+          audit_data?: Json;
+          email_draft?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
       golden_ticket_reports: {
         Row: {
           id: string;

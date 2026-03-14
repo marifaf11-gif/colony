@@ -1,40 +1,45 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { RadarScanner } from '@/components/colony/radar-scanner';
+import { RadarScanner, type RadarBlip } from '@/components/colony/radar-scanner';
 import { CncToggle } from '@/components/colony/cnc-toggle';
 import { FleetTelemetryFeed } from '@/components/colony/fleet-telemetry-feed';
-import { Zap, Eye, Activity, TrendingUp, TriangleAlert as AlertTriangle, ChevronRight, Crosshair, Radio, Server, Shield } from 'lucide-react';
+import { Zap, Eye, Activity, TrendingUp, TriangleAlert as AlertTriangle, ChevronRight, Crosshair, Radio, Server, Shield, Search, X, ExternalLink, Mail, MessageSquare, Loader as Loader2 } from 'lucide-react';
 
 interface HubClientProps { locale: string }
 
-interface VulnRow {
+interface StrikeRow {
   id: string;
-  target_url: string;
-  target_name: string | null;
-  vulnerability_type: string | null;
-  severity: string | null;
+  company_name: string;
+  website: string;
+  contact_email: string | null;
+  sector: string;
+  city: string;
+  tech_stack: string[];
+  loi25_gaps: string[];
+  severity: string;
+  revenue_value: number;
   status: string;
+  audit_data: Record<string, unknown>;
+  email_draft: string | null;
   created_at: string;
 }
 
-const PODS = [
-  { slug: 'conversion-catalyst', name: 'Conversion Catalyst', tagline: 'Revenue Leak Auditor',   href: '/pods/conversion-catalyst', color: '#39FF14', icon: Zap  },
-  { slug: 'cyberhawk',           name: 'Cyberhawk',           tagline: 'Talon HUD Scanner',       href: '/pods/cyberhawk',           color: '#4A9EFF', icon: Eye  },
-];
-
 const SEVERITY_COLOR: Record<string, string> = {
-  HIGH:      '#FF3B3B',
-  MEDIUM:    '#FFB830',
-  LOW:       '#39FF14',
-  TECH_DEBT: '#4A9EFF',
+  HIGH:   '#FF3B3B',
+  MEDIUM: '#FFB830',
+  LOW:    '#39FF14',
 };
 
-function MetalPanel({
-  children, className, accent,
-}: { children: React.ReactNode; className?: string; accent?: string }) {
+const SEV_TO_BLIP: Record<string, 'high' | 'mid' | 'low'> = {
+  HIGH: 'high', MEDIUM: 'mid', LOW: 'low',
+};
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+
+function MetalPanel({ children, className, accent }: { children: React.ReactNode; className?: string; accent?: string }) {
   return (
     <div
       className={`relative rounded-xl overflow-hidden ${className ?? ''}`}
@@ -44,11 +49,8 @@ function MetalPanel({
         boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.5), 0 6px 24px rgba(0,0,0,0.55)${accent ? `, 0 0 32px ${accent}0a` : ''}`,
       }}
     >
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(255,255,255,0.008) 1px, rgba(255,255,255,0.008) 2px)',
-        }}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(255,255,255,0.008) 1px, rgba(255,255,255,0.008) 2px)' }}
       />
       <div className="relative">{children}</div>
     </div>
@@ -64,10 +66,8 @@ function StatBar({ label, value, max, color }: { label: string; value: number; m
         <span className="text-[9px] font-mono font-bold" style={{ color }}>{value}</span>
       </div>
       <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
-        <div
-          className="h-full rounded-full transition-all duration-700"
-          style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${color}aa, ${color})`, boxShadow: `0 0 6px ${color}66` }}
-        />
+        <div className="h-full rounded-full transition-all duration-700"
+          style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${color}aa, ${color})`, boxShadow: `0 0 6px ${color}66` }} />
       </div>
     </div>
   );
@@ -76,70 +76,246 @@ function StatBar({ label, value, max, color }: { label: string; value: number; m
 function LiveIndicator({ color = '#39FF14' }: { color?: string }) {
   return (
     <span className="relative flex items-center justify-center w-2 h-2">
-      <span
-        className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
-        style={{ background: color }}
-      />
+      <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: color }} />
       <span className="relative inline-flex rounded-full w-1.5 h-1.5" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
     </span>
   );
 }
 
-export function HubClient({ locale }: HubClientProps) {
-  const [vulns, setVulns]             = useState<VulnRow[]>([]);
-  const [podToggles, setPodToggles]   = useState<Record<string, boolean>>({ 'cyberhawk': true, 'conversion-catalyst': true, 'q-metier': false, 'kaltrac-v2': false });
-  const [totalRevenue, setTotalRevenue] = useState(408640);
-  const [totalKinks, setTotalKinks]   = useState(247);
-  const [scanCount, setScanCount]     = useState(1842);
-  const [bountyTotal, setBountyTotal] = useState(2990);
+function AuditModal({ strike, onClose, onStrike }: { strike: StrikeRow; onClose: () => void; onStrike: (id: string) => void }) {
+  const [striking, setStriking] = useState(false);
+  const [strikeResult, setStrikeResult] = useState<{ gmail_draft_link?: string; whatsapp_link?: string } | null>(null);
+  const col = SEVERITY_COLOR[strike.severity] ?? '#39FF14';
 
-  const loadVulns = useCallback(async () => {
+  const handleStrike = async () => {
+    setStriking(true);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/strike-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ strike_id: strike.id }),
+      });
+      const data = await res.json();
+      setStrikeResult(data);
+      onStrike(strike.id);
+    } catch {
+      setStrikeResult({ gmail_draft_link: undefined, whatsapp_link: undefined });
+    } finally {
+      setStriking(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <MetalPanel className="w-full max-w-lg" accent={col}>
+        <div className="flex items-center justify-between px-5 py-4"
+          style={{ borderBottom: `1px solid ${col}18` }}>
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full" style={{ background: col, boxShadow: `0 0 8px ${col}` }} />
+            <span className="text-sm font-bold text-white">{strike.company_name}</span>
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded tracking-widest"
+              style={{ color: col, background: `${col}15`, border: `1px solid ${col}30` }}>
+              {strike.severity}
+            </span>
+          </div>
+          <button onClick={onClose} className="text-white/30 hover:text-white/70 transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, padding: '10px 14px' }}>
+              <p className="text-[9px] tracking-widest uppercase mb-1" style={{ color: 'rgba(255,255,255,0.25)' }}>TARGET</p>
+              <a href={strike.website} target="_blank" rel="noreferrer"
+                className="text-[11px] font-mono flex items-center gap-1 hover:underline" style={{ color: '#4A9EFF' }}>
+                {strike.website.replace('https://', '')}
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, padding: '10px 14px' }}>
+              <p className="text-[9px] tracking-widest uppercase mb-1" style={{ color: 'rgba(255,255,255,0.25)' }}>BOUNTY</p>
+              <p className="text-sm font-bold font-mono" style={{ color: '#39FF14', textShadow: '0 0 8px rgba(57,255,20,0.4)' }}>
+                ${(strike.revenue_value / 100).toLocaleString('en-CA')}
+              </p>
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '12px 14px' }}>
+            <p className="text-[9px] tracking-widest uppercase mb-2" style={{ color: 'rgba(255,255,255,0.25)' }}>TECH STACK</p>
+            <div className="flex flex-wrap gap-1.5">
+              {(strike.tech_stack ?? []).map((t: string) => (
+                <span key={t} className="text-[9px] px-2 py-0.5 rounded font-mono"
+                  style={{ background: 'rgba(74,158,255,0.1)', border: '1px solid rgba(74,158,255,0.2)', color: '#4A9EFF' }}>
+                  {t}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ background: `${col}08`, border: `1px solid ${col}20`, borderRadius: 8, padding: '12px 14px' }}>
+            <p className="text-[9px] tracking-widest uppercase mb-2" style={{ color: 'rgba(255,255,255,0.25)' }}>
+              LOI 25 GAPS ({(strike.loi25_gaps ?? []).length})
+            </p>
+            <div className="space-y-1.5">
+              {(strike.loi25_gaps ?? []).slice(0, 5).map((gap: string, i: number) => (
+                <div key={i} className="flex items-start gap-2">
+                  <div className="w-1 h-1 rounded-full mt-1.5 shrink-0" style={{ background: col }} />
+                  <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.55)' }}>{gap}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {strike.contact_email && (
+            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '10px 14px' }}>
+              <p className="text-[9px] tracking-widest uppercase mb-1" style={{ color: 'rgba(255,255,255,0.25)' }}>CONTACT</p>
+              <p className="text-[11px] font-mono" style={{ color: 'rgba(255,255,255,0.6)' }}>{strike.contact_email}</p>
+            </div>
+          )}
+
+          {strikeResult ? (
+            <div style={{ background: 'rgba(57,255,20,0.06)', border: '1px solid rgba(57,255,20,0.2)', borderRadius: 8, padding: '14px' }}>
+              <p className="text-[9px] font-bold tracking-widest uppercase mb-3" style={{ color: '#39FF14' }}>EMAIL STAGED — READY TO SEND</p>
+              <div className="flex gap-2">
+                {strikeResult.gmail_draft_link && (
+                  <a href={strikeResult.gmail_draft_link} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-bold tracking-wider transition-all hover:scale-105"
+                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff' }}>
+                    <Mail className="w-3.5 h-3.5" />
+                    OPEN GMAIL DRAFT
+                  </a>
+                )}
+                {strikeResult.whatsapp_link && (
+                  <a href={strikeResult.whatsapp_link} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-bold tracking-wider transition-all hover:scale-105"
+                    style={{ background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.25)', color: '#25D366' }}>
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    WHATSAPP
+                  </a>
+                )}
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={handleStrike}
+              disabled={striking}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-[11px] font-bold tracking-widest uppercase transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: 'linear-gradient(135deg, #3a0d0d, #5a1a1a)', border: '1px solid rgba(255,59,59,0.4)', color: '#FF3B3B', boxShadow: '0 0 20px rgba(255,59,59,0.15)' }}>
+              {striking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crosshair className="w-4 h-4" />}
+              {striking ? 'STAGING STRIKE...' : 'EXECUTE STRIKE — STAGE EMAIL'}
+            </button>
+          )}
+        </div>
+      </MetalPanel>
+    </div>
+  );
+}
+
+export function HubClient({ locale }: HubClientProps) {
+  const [strikes, setStrikes]         = useState<StrikeRow[]>([]);
+  const [podToggles, setPodToggles]   = useState<Record<string, boolean>>({
+    'cyberhawk': true, 'conversion-catalyst': true, 'scout': false, 'kaltrac-v2': false,
+  });
+  const [scanning, setScanning]       = useState(false);
+  const [selectedStrike, setSelectedStrike] = useState<StrikeRow | null>(null);
+  const [highlightedBlipId, setHighlightedBlipId] = useState<string | null>(null);
+  const scoutTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const loadStrikes = useCallback(async () => {
     const sb = createClient();
     const { data } = await sb
-      .from('vulnerability_log')
-      .select('id,target_url,target_name,vulnerability_type,severity,status,created_at')
+      .from('strikes')
+      .select('*')
       .order('created_at', { ascending: false })
-      .limit(6);
-    if (data) setVulns(data as VulnRow[]);
+      .limit(20);
+    if (data) setStrikes(data as StrikeRow[]);
   }, []);
 
   useEffect(() => {
-    loadVulns();
+    loadStrikes();
     const sb = createClient();
     const ch = sb
-      .channel('vulns-hub')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'vulnerability_log' }, loadVulns)
+      .channel('strikes-rt')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'strikes' }, loadStrikes)
       .subscribe();
     return () => { sb.removeChannel(ch); };
-  }, [loadVulns]);
+  }, [loadStrikes]);
+
+  const runScout = useCallback(async () => {
+    setScanning(true);
+    try {
+      await fetch(`${SUPABASE_URL}/functions/v1/scout-engine?action=scan&sector=all`, {
+        headers: { 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}` },
+      });
+      await loadStrikes();
+    } catch { /* silent */ }
+    setScanning(false);
+  }, [loadStrikes]);
 
   useEffect(() => {
-    const t = setInterval(() => {
-      setTotalRevenue((v) => v + Math.floor(Math.random() * 600 + 100));
-      setTotalKinks((v) => v + (Math.random() > 0.7 ? 1 : 0));
-      setScanCount((v) => v + (Math.random() > 0.5 ? 1 : 0));
-      setBountyTotal((v) => v + Math.floor(Math.random() * 50));
-    }, 7000);
-    return () => clearInterval(t);
-  }, []);
+    if (podToggles['scout']) {
+      runScout();
+      scoutTimerRef.current = setInterval(runScout, 45000);
+    } else {
+      if (scoutTimerRef.current) clearInterval(scoutTimerRef.current);
+    }
+    return () => { if (scoutTimerRef.current) clearInterval(scoutTimerRef.current); };
+  }, [podToggles['scout'], runScout]);
 
-  const activeVulns   = vulns.filter((v) => v.status === 'DETECTED' || v.status === 'STRIKING').length;
-  const resolvedVulns = vulns.filter((v) => v.status === 'BOUNTY_PAID').length;
+  const handleBlipClick = useCallback((blipId: string) => {
+    const strike = strikes.find((s) => s.id === blipId);
+    if (strike) {
+      setSelectedStrike(strike);
+      setHighlightedBlipId(blipId);
+    }
+  }, [strikes]);
+
+  const handleStrikeCompleted = useCallback(async (strikeId: string) => {
+    await loadStrikes();
+    setHighlightedBlipId(null);
+  }, [loadStrikes]);
+
+  const radarBlips: RadarBlip[] = strikes.map((s, i) => ({
+    id:       s.id,
+    angle:    (i * 67 + 30) % 360,
+    radius:   0.25 + (i * 0.13) % 0.65,
+    label:    s.company_name,
+    severity: SEV_TO_BLIP[s.severity] ?? 'mid',
+    born:     new Date(s.created_at).getTime(),
+  }));
+
+  const totalRevenue = strikes.reduce((sum, s) => {
+    if (s.status === 'BOUNTY_PAID' || s.status === 'STAGED' || s.status === 'SENT') return sum + s.revenue_value;
+    return sum;
+  }, 0);
+
+  const projectedRevenue = strikes.reduce((sum, s) => sum + s.revenue_value, 0);
+  const highCount   = strikes.filter((s) => s.severity === 'HIGH').length;
+  const medCount    = strikes.filter((s) => s.severity === 'MEDIUM').length;
+  const computedBounty = highCount * 5000 + medCount * 2500;
+  const activeCount = strikes.filter((s) => s.status === 'AUDITED' || s.status === 'DETECTED').length;
 
   return (
     <div className="flex-1 overflow-y-auto bg-[#0d1117]" style={{ fontFamily: '"JetBrains Mono", "Fira Code", monospace' }}>
-      <div
-        className="px-6 py-4 flex items-center justify-between"
-        style={{
-          background: 'linear-gradient(180deg, #141921 0%, transparent 100%)',
-          borderBottom: '1px solid rgba(255,255,255,0.04)',
-        }}
-      >
+      {selectedStrike && (
+        <AuditModal
+          strike={selectedStrike}
+          onClose={() => { setSelectedStrike(null); setHighlightedBlipId(null); }}
+          onStrike={handleStrikeCompleted}
+        />
+      )}
+
+      <div className="px-6 py-4 flex items-center justify-between"
+        style={{ background: 'linear-gradient(180deg, #141921 0%, transparent 100%)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
         <div className="flex items-center gap-4">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #1e3a5f, #0d1f38)', border: '1px solid rgba(74,158,255,0.3)', boxShadow: '0 0 12px rgba(74,158,255,0.2)' }}
-          >
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #1e3a5f, #0d1f38)', border: '1px solid rgba(74,158,255,0.3)', boxShadow: '0 0 12px rgba(74,158,255,0.2)' }}>
             <Radio className="w-4 h-4" style={{ color: '#4A9EFF' }} />
           </div>
           <div>
@@ -149,20 +325,21 @@ export function HubClient({ locale }: HubClientProps) {
         </div>
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <LiveIndicator color="#39FF14" />
-            <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: '#39FF14' }}>LIVE</span>
+            {scanning ? <Loader2 className="w-3 h-3 animate-spin" style={{ color: '#FFB830' }} /> : <LiveIndicator color="#39FF14" />}
+            <span className="text-[9px] font-bold uppercase tracking-widest"
+              style={{ color: scanning ? '#FFB830' : '#39FF14' }}>
+              {scanning ? 'SCANNING...' : 'LIVE'}
+            </span>
           </div>
           <div className="text-right">
             <p className="text-[9px] tracking-widest" style={{ color: 'rgba(255,255,255,0.2)' }}>BOUNTY_POOL</p>
             <p className="text-sm font-bold font-mono" style={{ color: '#FFB830', textShadow: '0 0 12px rgba(255,184,48,0.4)' }}>
-              ${bountyTotal.toLocaleString()}.00
+              ${computedBounty.toLocaleString('en-CA')}
             </p>
           </div>
-          <Link
-            href={`/${locale}/core/strike`}
+          <Link href={`/${locale}/core/strike`}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-all hover:scale-105"
-            style={{ background: 'linear-gradient(135deg, #3a0d0d, #5a1a1a)', border: '1px solid rgba(255,59,59,0.35)', color: '#FF3B3B', boxShadow: '0 0 12px rgba(255,59,59,0.15)' }}
-          >
+            style={{ background: 'linear-gradient(135deg, #3a0d0d, #5a1a1a)', border: '1px solid rgba(255,59,59,0.35)', color: '#FF3B3B', boxShadow: '0 0 12px rgba(255,59,59,0.15)' }}>
             <Crosshair className="w-3.5 h-3.5" />
             STRIKE
           </Link>
@@ -174,20 +351,28 @@ export function HubClient({ locale }: HubClientProps) {
           <MetalPanel className="p-4">
             <p className="text-[9px] font-bold tracking-[0.22em] uppercase mb-3" style={{ color: 'rgba(255,255,255,0.25)' }}>POD_FLEET_REGISTRY</p>
             <div className="space-y-1.5">
-              <CncToggle label="CYBERHAWK"      color="blue"  checked={podToggles['cyberhawk']}           onChange={(v) => setPodToggles((p) => ({ ...p, 'cyberhawk': v }))}           sublabel="Talon HUD Scanner" />
-              <CncToggle label="CONV.CATALYST"  color="green" checked={podToggles['conversion-catalyst']} onChange={(v) => setPodToggles((p) => ({ ...p, 'conversion-catalyst': v }))} sublabel="Revenue Leak Auditor" />
-              <CncToggle label="Q-MÉTIER"       color="amber" checked={podToggles['q-metier']}            onChange={(v) => setPodToggles((p) => ({ ...p, 'q-metier': v }))}            sublabel="Trade Intelligence" />
-              <CncToggle label="KALTRAC_V2"     color="red"   checked={podToggles['kaltrac-v2']}          onChange={(v) => setPodToggles((p) => ({ ...p, 'kaltrac-v2': v }))}          sublabel="Arsenal API Engine" />
+              <CncToggle label="CYBERHAWK"     color="blue"  checked={podToggles['cyberhawk']}           onChange={(v) => setPodToggles((p) => ({ ...p, cyberhawk: v }))}           sublabel="Talon HUD Scanner" />
+              <CncToggle label="CONV.CATALYST" color="green" checked={podToggles['conversion-catalyst']} onChange={(v) => setPodToggles((p) => ({ ...p, 'conversion-catalyst': v }))} sublabel="Revenue Leak Auditor" />
+              <CncToggle label="SCOUT_ENGINE"  color="amber" checked={podToggles['scout']}               onChange={(v) => setPodToggles((p) => ({ ...p, scout: v }))}               sublabel="MTL Business Scanner" />
+              <CncToggle label="KALTRAC_V2"    color="red"   checked={podToggles['kaltrac-v2']}          onChange={(v) => setPodToggles((p) => ({ ...p, 'kaltrac-v2': v }))}          sublabel="Arsenal API Engine" />
             </div>
+            {scanning && (
+              <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-3 h-3 animate-spin" style={{ color: '#FFB830' }} />
+                  <p className="text-[9px] tracking-wider" style={{ color: '#FFB830' }}>SCOUT SCANNING MTL...</p>
+                </div>
+              </div>
+            )}
           </MetalPanel>
 
           <MetalPanel className="p-4" accent="#4A9EFF">
             <p className="text-[9px] font-bold tracking-[0.22em] uppercase mb-3" style={{ color: 'rgba(255,255,255,0.25)' }}>SYS_TELEMETRY</p>
             <div className="space-y-3">
-              <StatBar label="API CALLS / DAY"  value={scanCount}               max={3000} color="#4A9EFF" />
-              <StatBar label="KINKS DETECTED"   value={totalKinks}              max={500}  color="#FFB830" />
-              <StatBar label="RESOLVED"         value={resolvedVulns || 12}     max={50}   color="#39FF14" />
-              <StatBar label="HIGH SEVERITY"    value={activeVulns || 8}        max={30}   color="#FF3B3B" />
+              <StatBar label="TARGETS FOUND"   value={strikes.length}  max={50}  color="#4A9EFF" />
+              <StatBar label="HIGH SEVERITY"   value={highCount}        max={20}  color="#FF3B3B" />
+              <StatBar label="MEDIUM SEVERITY" value={medCount}         max={30}  color="#FFB830" />
+              <StatBar label="STRIKES STAGED"  value={strikes.filter((s) => s.status === 'STAGED').length} max={20} color="#39FF14" />
             </div>
           </MetalPanel>
 
@@ -198,16 +383,20 @@ export function HubClient({ locale }: HubClientProps) {
               <LiveIndicator color="#39FF14" />
             </div>
             <p className="text-[10px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              "Scanning Quebec sector for revenue leaks. 3 high-impact targets in queue."
+              {strikes.length > 0
+                ? `${activeCount} targets awaiting audit. ${highCount} HIGH severity Loi 25 violations detected in MTL sector.`
+                : '"Toggle SCOUT_ENGINE to begin scanning Montreal sector for revenue leaks."'}
             </p>
             <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
               <div className="flex justify-between">
-                <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>MODEL</span>
-                <span className="text-[9px] font-bold" style={{ color: '#4A9EFF' }}>GPT-4o</span>
+                <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>SECTOR</span>
+                <span className="text-[9px] font-bold" style={{ color: '#4A9EFF' }}>MONTREAL_QC</span>
               </div>
               <div className="flex justify-between mt-1">
-                <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>BUDGET_LEFT</span>
-                <span className="text-[9px] font-bold" style={{ color: '#39FF14' }}>$4.82</span>
+                <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>PROJECTED</span>
+                <span className="text-[9px] font-bold" style={{ color: '#39FF14' }}>
+                  ${(projectedRevenue / 100).toLocaleString('en-CA')}
+                </span>
               </div>
             </div>
           </MetalPanel>
@@ -215,16 +404,16 @@ export function HubClient({ locale }: HubClientProps) {
 
         <div className="col-span-5">
           <MetalPanel className="h-full" accent="#39FF14">
-            <div
-              className="flex items-center justify-between px-5 py-3"
-              style={{ borderBottom: '1px solid rgba(57,255,20,0.08)' }}
-            >
+            <div className="flex items-center justify-between px-5 py-3"
+              style={{ borderBottom: '1px solid rgba(57,255,20,0.08)' }}>
               <div className="flex items-center gap-2">
                 <Crosshair className="w-3.5 h-3.5" style={{ color: '#39FF14' }} />
-                <span className="text-[9px] font-bold tracking-[0.2em] uppercase" style={{ color: 'rgba(255,255,255,0.4)' }}>TACTICAL_RADAR // SECTOR_MTL</span>
+                <span className="text-[9px] font-bold tracking-[0.2em] uppercase" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                  TACTICAL_RADAR // SECTOR_MTL
+                </span>
               </div>
               <div className="flex items-center gap-3 text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
-                <span>RANGE: 80KM</span>
+                <span>CLICK BLIP TO AUDIT</span>
                 <span style={{ color: 'rgba(57,255,20,0.5)' }}>■</span><span>LOW</span>
                 <span style={{ color: 'rgba(255,184,48,0.5)' }}>■</span><span>MID</span>
                 <span style={{ color: 'rgba(255,59,59,0.5)' }}>■</span><span>HIGH</span>
@@ -232,19 +421,21 @@ export function HubClient({ locale }: HubClientProps) {
             </div>
 
             <div className="flex items-center justify-center py-6">
-              <RadarScanner />
+              <RadarScanner
+                externalBlips={radarBlips.length > 0 ? radarBlips : undefined}
+                onBlipClick={handleBlipClick}
+                highlightedId={highlightedBlipId}
+              />
             </div>
 
-            <div
-              className="px-5 py-3 flex items-center justify-between"
-              style={{ borderTop: '1px solid rgba(57,255,20,0.08)' }}
-            >
+            <div className="px-5 py-3 flex items-center justify-between"
+              style={{ borderTop: '1px solid rgba(57,255,20,0.08)' }}>
               <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>
-                TARGETS_TRACKED: {vulns.length + 5}
+                TARGETS_TRACKED: {strikes.length || '—'}
               </span>
               <div className="flex items-center gap-4">
                 <span className="text-[9px] font-mono" style={{ color: '#39FF14' }}>
-                  REV_OPPORTUNITY: ${(totalRevenue / 1000).toFixed(1)}K
+                  BOUNTY_POOL: ${computedBounty.toLocaleString('en-CA')}
                 </span>
                 <LiveIndicator color="#39FF14" />
               </div>
@@ -253,97 +444,82 @@ export function HubClient({ locale }: HubClientProps) {
         </div>
 
         <div className="col-span-4 space-y-4">
-          <MetalPanel className="p-4">
-            <p className="text-[9px] font-bold tracking-[0.22em] uppercase mb-3" style={{ color: 'rgba(255,255,255,0.25)' }}>FLEET_PODS</p>
-            <div className="space-y-2">
-              {PODS.map((pod) => {
-                const Icon = pod.icon;
-                const isOn = podToggles[pod.slug];
+          <MetalPanel className="p-4" accent="#FF3B3B">
+            <div className="flex items-center gap-2 mb-3">
+              <Search className="w-3.5 h-3.5" style={{ color: '#FFB830' }} />
+              <p className="text-[9px] font-bold tracking-[0.22em] uppercase" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                LIVE_STRIKES {strikes.length > 0 && `(${strikes.length})`}
+              </p>
+              {scanning && <Loader2 className="w-3 h-3 animate-spin ml-auto" style={{ color: '#FFB830' }} />}
+            </div>
+            <div className="space-y-1.5 max-h-[260px] overflow-y-auto">
+              {strikes.length > 0 ? strikes.slice(0, 8).map((s) => {
+                const col = SEVERITY_COLOR[s.severity] ?? '#39FF14';
                 return (
-                  <Link
-                    key={pod.slug}
-                    href={`/${locale}${pod.href}`}
-                    className="group flex items-center gap-3 p-3 rounded-lg transition-all duration-200"
-                    style={{
-                      background: isOn ? `${pod.color}0a` : 'rgba(255,255,255,0.02)',
-                      border: `1px solid ${isOn ? `${pod.color}25` : 'rgba(255,255,255,0.05)'}`,
-                      boxShadow: isOn ? `inset 0 1px 0 rgba(255,255,255,0.05), 0 0 16px ${pod.color}0d` : 'none',
-                    }}
-                  >
-                    <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                      style={{ background: `${pod.color}15`, border: `1px solid ${pod.color}30` }}
-                    >
-                      <Icon className="w-4 h-4" style={{ color: pod.color }} />
-                    </div>
+                  <button key={s.id}
+                    onClick={() => { setSelectedStrike(s); setHighlightedBlipId(s.id); }}
+                    className="w-full text-left flex items-start gap-2.5 py-2 px-2 rounded-lg transition-all hover:bg-white/5"
+                    style={{ border: `1px solid ${highlightedBlipId === s.id ? `${col}30` : 'transparent'}` }}>
+                    <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: col, boxShadow: `0 0 4px ${col}` }} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-white">{pod.name}</p>
-                      <p className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>{pod.tagline}</p>
+                      <p className="text-[10px] font-bold truncate" style={{ color: 'rgba(255,255,255,0.75)' }}>{s.company_name}</p>
+                      <p className="text-[9px] mt-0.5 truncate" style={{ color: 'rgba(255,255,255,0.25)' }}>{s.website.replace('https://', '')}</p>
                     </div>
-                    <span
-                      className="text-[8px] font-bold px-1.5 py-0.5 rounded tracking-widest"
-                      style={{
-                        color:      isOn ? pod.color : 'rgba(255,255,255,0.2)',
-                        background: isOn ? `${pod.color}15` : 'rgba(255,255,255,0.04)',
-                        border:     `1px solid ${isOn ? `${pod.color}30` : 'rgba(255,255,255,0.06)'}`,
-                      }}
-                    >
-                      {isOn ? 'LIVE' : 'OFF'}
-                    </span>
-                    <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-50 transition-opacity shrink-0" style={{ color: pod.color }} />
-                  </Link>
+                    <div className="text-right shrink-0">
+                      <span className="text-[8px] font-bold px-1 py-0.5 rounded"
+                        style={{ color: col, background: `${col}15`, border: `1px solid ${col}25` }}>
+                        {s.severity}
+                      </span>
+                      <p className="text-[9px] mt-1 font-mono" style={{ color: '#39FF14' }}>
+                        ${(s.revenue_value / 100).toLocaleString('en-CA')}
+                      </p>
+                    </div>
+                  </button>
                 );
-              })}
-
-              <div
-                className="flex items-center gap-3 p-3 rounded-lg opacity-35"
-                style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)' }}
-              >
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                  <Activity className="w-4 h-4 text-white/20" />
+              }) : (
+                <div className="py-6 text-center">
+                  <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                    Toggle SCOUT_ENGINE to populate targets
+                  </p>
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs font-bold text-white/40">Q-MÉTIER</p>
-                  <p className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.2)' }}>Trade Intelligence</p>
-                </div>
-                <span className="text-[8px] font-bold px-1.5 py-0.5 rounded tracking-widest" style={{ color: '#FFB830', background: 'rgba(255,184,48,0.08)', border: '1px solid rgba(255,184,48,0.15)' }}>BETA</span>
-              </div>
+              )}
             </div>
           </MetalPanel>
 
-          <MetalPanel className="p-4" accent="#FF3B3B">
+          <MetalPanel className="p-4">
             <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="w-3.5 h-3.5" style={{ color: '#FFB830' }} />
-              <p className="text-[9px] font-bold tracking-[0.22em] uppercase" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                LIVE_THREATS {vulns.length > 0 && `(${vulns.length})`}
-              </p>
+              <Activity className="w-3.5 h-3.5" style={{ color: '#4A9EFF' }} />
+              <p className="text-[9px] font-bold tracking-[0.22em] uppercase" style={{ color: 'rgba(255,255,255,0.25)' }}>FLEET_PODS</p>
             </div>
             <div className="space-y-2">
-              {vulns.length > 0 ? vulns.slice(0, 4).map((v) => {
-                const col = SEVERITY_COLOR[v.severity ?? 'LOW'] ?? '#39FF14';
+              {[
+                { slug: 'conversion-catalyst', name: 'Conversion Catalyst', tagline: 'Revenue Leak Auditor', href: '/pods/conversion-catalyst', color: '#39FF14', Icon: Zap },
+                { slug: 'cyberhawk',           name: 'Cyberhawk',           tagline: 'Talon HUD Scanner',    href: '/pods/cyberhawk',           color: '#4A9EFF', Icon: Eye },
+              ].map(({ slug, name, tagline, href, color, Icon }) => {
+                const isOn = podToggles[slug];
                 return (
-                  <div key={v.id} className="flex items-start gap-2.5 py-1">
-                    <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: col, boxShadow: `0 0 4px ${col}` }} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[10px] text-white/60 truncate">{v.target_name ?? v.target_url}</p>
-                      <p className="text-[9px] mt-0.5" style={{ color: 'rgba(255,255,255,0.2)' }}>{v.vulnerability_type ?? 'UNKNOWN'}</p>
+                  <Link key={slug} href={`/${locale}${href}`}
+                    className="group flex items-center gap-3 p-3 rounded-lg transition-all duration-200"
+                    style={{
+                      background: isOn ? `${color}0a` : 'rgba(255,255,255,0.02)',
+                      border: `1px solid ${isOn ? `${color}25` : 'rgba(255,255,255,0.05)'}`,
+                    }}>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                      style={{ background: `${color}15`, border: `1px solid ${color}30` }}>
+                      <Icon className="w-4 h-4" style={{ color }} />
                     </div>
-                    <span className="text-[8px] font-bold px-1 py-0.5 rounded shrink-0" style={{ color: col, background: `${col}15`, border: `1px solid ${col}25` }}>
-                      {v.status}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-white">{name}</p>
+                      <p className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>{tagline}</p>
+                    </div>
+                    <span className="text-[8px] font-bold px-1.5 py-0.5 rounded tracking-widest"
+                      style={{ color: isOn ? color : 'rgba(255,255,255,0.2)', background: isOn ? `${color}15` : 'rgba(255,255,255,0.04)', border: `1px solid ${isOn ? `${color}30` : 'rgba(255,255,255,0.06)'}` }}>
+                      {isOn ? 'LIVE' : 'OFF'}
                     </span>
-                  </div>
+                    <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-50 transition-opacity shrink-0" style={{ color }} />
+                  </Link>
                 );
-              }) : [
-                { msg: 'Conversion Catalyst: 11 high-impact kinks on example.ca', time: '2m', color: '#FF3B3B' },
-                { msg: 'Cyberhawk scan complete — $5.2K opportunity',              time: '12m', color: '#FFB830' },
-                { msg: 'Fleet telemetry nominal — all pods reporting',              time: '1h',  color: '#39FF14' },
-              ].map((a, i) => (
-                <div key={i} className="flex items-start gap-2.5 py-1">
-                  <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: a.color, boxShadow: `0 0 4px ${a.color}` }} />
-                  <p className="text-[10px] text-white/50 flex-1">{a.msg}</p>
-                  <span className="text-[9px] shrink-0" style={{ color: 'rgba(255,255,255,0.15)' }}>{a.time}</span>
-                </div>
-              ))}
+              })}
             </div>
           </MetalPanel>
 
@@ -354,20 +530,14 @@ export function HubClient({ locale }: HubClientProps) {
         </div>
       </div>
 
-      <div
-        className="mx-6 mb-6 px-5 py-3 rounded-xl flex items-center gap-6"
-        style={{
-          background: 'linear-gradient(160deg, #141921 0%, #0e1318 100%)',
-          border: '1px solid rgba(255,255,255,0.04)',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
-        }}
-      >
+      <div className="mx-6 mb-6 px-5 py-3 rounded-xl flex items-center gap-6"
+        style={{ background: 'linear-gradient(160deg, #141921 0%, #0e1318 100%)', border: '1px solid rgba(255,255,255,0.04)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
         {[
-          { label: 'TOTAL_REV_RECOVERED', value: `$${(totalRevenue / 1000).toFixed(1)}K`, color: '#39FF14' },
-          { label: 'KINKS_IDENTIFIED',    value: totalKinks.toString(),                    color: '#FFB830' },
-          { label: 'SCANS_EXECUTED',      value: scanCount.toString(),                     color: '#4A9EFF' },
-          { label: 'AVG_IMPACT_SCAN',     value: '$1.6K',                                  color: '#FF3B3B' },
-          { label: 'PODS_ACTIVE',         value: `${Object.values(podToggles).filter(Boolean).length} / 4`, color: '#39FF14' },
+          { label: 'BOUNTY_POOL',      value: `$${computedBounty.toLocaleString('en-CA')}`,             color: '#39FF14' },
+          { label: 'HIGH_THREATS',     value: highCount.toString(),                                      color: '#FF3B3B' },
+          { label: 'MEDIUM_THREATS',   value: medCount.toString(),                                       color: '#FFB830' },
+          { label: 'PROJECTED_REV',    value: `$${(projectedRevenue / 100).toLocaleString('en-CA')}`,   color: '#4A9EFF' },
+          { label: 'STRIKES_STAGED',   value: strikes.filter((s) => s.status === 'STAGED').length.toString(), color: '#39FF14' },
         ].map((stat) => (
           <div key={stat.label} className="flex-1 min-w-0">
             <p className="text-[9px] tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>{stat.label}</p>
