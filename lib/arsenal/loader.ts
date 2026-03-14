@@ -117,6 +117,21 @@ const SEED_TOOLS: Omit<ArsenalTool, 'id'>[] = [
   },
 ];
 
+export async function embedArsenal(): Promise<{ embedded: number }> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !anonKey) return { embedded: 0 };
+  try {
+    const res = await fetch(`${supabaseUrl}/functions/v1/arsenal-embedder?mode=seed`, {
+      headers: { Authorization: `Bearer ${anonKey}` },
+    });
+    const data = await res.json();
+    return { embedded: data.embedded ?? 0 };
+  } catch {
+    return { embedded: 0 };
+  }
+}
+
 export async function seedArsenal(): Promise<{ loaded: number; skipped: number }> {
   const supabase = createClient();
   const { count } = await supabase

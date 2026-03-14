@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { getRecentLogs, subscribeToLogs } from '@/lib/agents/terminal-logger';
 import { getTodayBudgetSummary, getAllTimeBounties } from '@/lib/agents/budget-tracker';
-import { getArsenalTools, seedArsenal } from '@/lib/arsenal/loader';
+import { getArsenalTools, seedArsenal, embedArsenal } from '@/lib/arsenal/loader';
 import { selectWeapon } from '@/lib/arsenal/weaponry-selector';
 import type { TerminalLog, AgentBudget, VulnerabilityLog } from '@/lib/agents/types';
 import type { ArsenalTool } from '@/lib/arsenal/loader';
@@ -61,7 +61,10 @@ export function StrikeClient({ locale: _locale }: StrikeClientProps) {
     setAllTimeBounties(bountiesData);
     setArsenalTools(toolsData);
 
-    await seedArsenal();
+    const { loaded } = await seedArsenal();
+    if (loaded > 0) {
+      embedArsenal();
+    }
 
     const supabase = createClient();
     const { data } = await supabase

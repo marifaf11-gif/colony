@@ -30,20 +30,11 @@ export interface VulnerabilityLog {
   target_url: string;
   target_name: string | null;
   vulnerability_type: string | null;
-  kink_type: string;
-  title: string;
-  description: string;
-  severity: string;
-  impact_estimate: number;
-  status: string;
+  severity: string | null;
   raw_data: Record<string, unknown> | null;
+  status: string;
   hound_id: string | null;
-  golden_ticket_html: string | null;
-  stripe_remediation_link: string | null;
-  discord_message_id: string | null;
-  metadata: Record<string, unknown>;
   created_at: string;
-  updated_at: string;
 }
 
 export interface AgentBudget {
