@@ -183,7 +183,9 @@ Deno.serve(async (req: Request) => {
     const sector = url.searchParams.get("sector") ?? "all";
 
     if (action === "scan") {
+      await supabase.from("app_state").update({ is_scanning: true, updated_at: new Date().toISOString() }).eq("id", 1);
       const result = await runScan(supabase, sector, correlationId);
+      await supabase.from("app_state").update({ is_scanning: false, updated_at: new Date().toISOString() }).eq("id", 1);
       console.log(JSON.stringify({ event: "scout-scan-complete", correlationId, ...result }));
 
       return new Response(JSON.stringify({ success: true, correlationId, ...result }), {
