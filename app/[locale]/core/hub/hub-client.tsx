@@ -7,6 +7,7 @@ import { RadarScanner, type RadarBlip } from '@/components/colony/radar-scanner'
 import { CncToggle } from '@/components/colony/cnc-toggle';
 import { FleetTelemetryFeed } from '@/components/colony/fleet-telemetry-feed';
 import { Zap, Eye, Activity, TrendingUp, ChevronRight, Crosshair, Radio, Server, Shield, Search, X, ExternalLink, Mail, MessageSquare, Loader as Loader2, CreditCard, Filter } from 'lucide-react';
+import { PaymentsPanel } from '@/components/colony/payments-panel';
 
 interface HubClientProps { locale: string }
 
@@ -643,6 +644,10 @@ export function HubClient({ locale }: HubClientProps) {
                 );
               })}
             </div>
+          </MetalPanel>
+
+          <MetalPanel className="p-4" accent="#39FF14">
+            <PaymentsPanel />
           </MetalPanel>
 
           <MetalPanel className="p-4">

@@ -8,9 +8,24 @@ import { Toaster } from '@/components/ui/sonner';
 
 const inter = Inter({ subsets: ['latin'] });
 
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://colonyos.netlify.app';
+
 export const metadata: Metadata = {
-  title: 'Colony OS',
-  description: 'A skeuomorphic operating system interface',
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default: 'Colony OS — Loi 25 Compliance Revenue Engine',
+    template: '%s | Colony OS',
+  },
+  description:
+    'Autonomous Loi 25 compliance scanning for Montréal businesses. Detect privacy violations, generate AI outreach, and close $299 CAD remediation deals on autopilot.',
+  openGraph: {
+    type: 'website',
+    siteName: 'Colony OS',
+    title: 'Colony OS — Loi 25 Compliance Revenue Engine',
+    description:
+      'Autonomous Loi 25 compliance scanning for Montréal businesses. Detect privacy violations, generate AI outreach, and close $299 CAD remediation deals on autopilot.',
+  },
+  robots: { index: true, follow: true },
 };
 
 export async function generateStaticParams() {
