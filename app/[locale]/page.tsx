@@ -3,6 +3,8 @@ import type { Locale } from '@/lib/i18n/config';
 import { createServerClient } from '@/lib/supabase/server';
 import { LandingClient } from './landing-client';
 
+export const dynamic = 'force-dynamic';
+
 interface HomePageProps {
   params: { locale: Locale };
 }
