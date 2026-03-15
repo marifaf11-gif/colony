@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Shield, Zap, Eye, Radio, Crosshair, ChevronRight, TrendingUp, Lock, Globe, ChartBar as BarChart3, ArrowRight, Activity } from 'lucide-react';
+import { createBrowserClient } from '@supabase/ssr';
 
 interface LandingStats {
   totalStrikes: number;
@@ -12,7 +13,6 @@ interface LandingStats {
 
 interface LandingClientProps {
   locale: string;
-  stats: LandingStats;
 }
 
 function useCountUp(target: number, duration = 1800, start = false) {
@@ -72,9 +72,31 @@ const GRID_STYLE = {
   backgroundSize: '40px 40px',
 };
 
-export function LandingClient({ locale, stats }: LandingClientProps) {
+export function LandingClient({ locale }: LandingClientProps) {
   const loginHref = `/${locale}/auth/login`;
   const hubHref   = `/${locale}/core/hub`;
+
+  const [stats, setStats] = useState<LandingStats>({ totalStrikes: 0, highSeverity: 0, revenuePool: 0 });
+
+  useEffect(() => {
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    (async () => {
+      const [strikesRes, highRes] = await Promise.all([
+        supabase.from('strikes').select('id, revenue_value', { count: 'exact' }),
+        supabase.from('strikes').select('id', { count: 'exact' }).eq('severity', 'HIGH'),
+      ]);
+      const rows = (strikesRes.data ?? []) as { revenue_value: number }[];
+      const revenuePool = rows.reduce((sum, r) => sum + (r.revenue_value ?? 0), 0);
+      setStats({
+        totalStrikes: strikesRes.count ?? rows.length,
+        highSeverity: highRes.count ?? 0,
+        revenuePool,
+      });
+    })();
+  }, []);
 
   return (
     <div className="min-h-screen" style={{ background: '#080d12', fontFamily: '"JetBrains Mono", "Fira Code", ui-monospace, monospace', color: '#fff' }}>
