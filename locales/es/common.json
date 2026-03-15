@@ -67,6 +67,20 @@
       "coreVitals": "Métricas Principales",
       "conversionArch": "Arquitectura de Conversión",
       "seoSurface": "Superficie SEO"
+    },
+    "cyberchien": {
+      "title": "Cyberchien",
+      "description": "Escáner de seguridad Talon HUD",
+      "launchScan": "Lanzar escaneo Talon",
+      "newScan": "Nuevo escaneo",
+      "scanCapabilities": "Capacidades de escaneo",
+      "detectedStack": "Stack detectado",
+      "threatLevel": "Nivel de amenaza",
+      "findings": "hallazgos",
+      "riskExposure": "exposición al riesgo",
+      "goldenTicket": "Informe Ticket Dorado",
+      "generating": "Generando...",
+      "scanFailed": "Escaneo fallido — verifique la URL"
     }
   },
   "dashboard": {

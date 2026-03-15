@@ -48,7 +48,7 @@ function AnimatedStat({ label, value, prefix = '', suffix = '', color = '#39FF14
   return (
     <div ref={ref} className="text-center">
       <div className="text-4xl font-bold font-mono mb-1" style={{ color, textShadow: `0 0 24px ${color}55` }}>
-        {prefix}{display.toLocaleString('en-CA')}{suffix}
+        {prefix}{display.toLocaleString('fr-CA')}{suffix}
       </div>
       <div className="text-[10px] tracking-[0.2em] uppercase" style={{ color: 'rgba(255,255,255,0.35)' }}>{label}</div>
     </div>
@@ -139,22 +139,22 @@ export function LandingClient({ locale }: LandingClientProps) {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8"
             style={{ background: 'rgba(57,255,20,0.08)', border: '1px solid rgba(57,255,20,0.2)' }}>
             <PulsingDot color="#39FF14" />
-            <span className="text-[9px] tracking-[0.25em] uppercase" style={{ color: '#39FF14' }}>LIVE — SCANNING MONTRÉAL SECTOR</span>
+            <span className="text-[9px] tracking-[0.25em] uppercase" style={{ color: '#39FF14' }}>EN DIRECT — BALAYAGE DU SECTEUR MONTRÉAL</span>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none mb-6">
-            <span style={{ color: '#fff' }}>TURN COMPLIANCE</span>
+            <span style={{ color: '#fff' }}>TRANSFORMEZ LA CONFORMITÉ</span>
             <br />
             <span style={{ background: 'linear-gradient(135deg, #4A9EFF, #39FF14)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              GAPS INTO REVENUE
+              EN REVENUS
             </span>
           </h1>
 
           <p className="text-sm md:text-base max-w-2xl mx-auto mb-4 leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            Colony OS autonomously scans Montréal businesses for Loi 25 privacy violations, generates AI-crafted outreach, and closes $299 CAD remediation deals — on autopilot.
+            Colonie OS analyse automatiquement les entreprises montréalaises pour détecter les violations de la Loi 25, génère des propositions IA, et conclut des contrats de remédiation à 299 $ CAD — en autopilote.
           </p>
           <p className="text-xs mb-12" style={{ color: 'rgba(255,255,255,0.25)' }}>
-            Scout Engine · Cyberhawk · Conversion Catalyst · Strike Command
+            Moteur Scout · Cyberchien · Catalyseur de Conversion · Commande de Frappe
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
@@ -162,21 +162,21 @@ export function LandingClient({ locale }: LandingClientProps) {
               className="group flex items-center gap-3 px-8 py-4 rounded-xl text-sm font-bold tracking-widest uppercase transition-all hover:scale-105"
               style={{ background: 'linear-gradient(135deg, #0d2040, #1a4a8a)', border: '1px solid rgba(74,158,255,0.5)', color: '#4A9EFF', boxShadow: '0 0 32px rgba(74,158,255,0.2)' }}>
               <Radio className="w-4 h-4" />
-              LAUNCH MISSION CONTROL
+              LANCER LE CENTRE DE COMMANDE
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <Link href={loginHref}
               className="flex items-center gap-2 px-6 py-4 rounded-xl text-sm font-bold tracking-widest uppercase transition-all hover:opacity-80"
               style={{ border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.45)' }}>
-              CREATE ACCOUNT
+              CRÉER UN COMPTE
             </Link>
           </div>
 
           {/* LIVE STATS */}
           <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
-            <AnimatedStat label="Targets Detected"   value={stats.totalStrikes}             color="#4A9EFF" />
-            <AnimatedStat label="High Severity"       value={stats.highSeverity}             color="#FF3B3B" />
-            <AnimatedStat label="Bounty Pool"          value={Math.floor(stats.revenuePool / 100)} prefix="$" color="#39FF14" />
+            <AnimatedStat label="Cibles détectées"   value={stats.totalStrikes}             color="#4A9EFF" />
+            <AnimatedStat label="Sévérité élevée"       value={stats.highSeverity}             color="#FF3B3B" />
+            <AnimatedStat label="Fonds de primes"          value={Math.floor(stats.revenuePool / 100)} prefix="$" color="#39FF14" />
           </div>
         </div>
       </section>
@@ -185,11 +185,11 @@ export function LandingClient({ locale }: LandingClientProps) {
       <div style={{ background: 'rgba(74,158,255,0.05)', borderTop: '1px solid rgba(74,158,255,0.1)', borderBottom: '1px solid rgba(74,158,255,0.1)' }}>
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between overflow-x-auto gap-8">
           {[
-            { label: 'SECTOR',        value: 'MONTRÉAL_QC',   color: '#4A9EFF' },
-            { label: 'REGULATION',    value: 'LOI_25 / C-11', color: '#FFB830' },
-            { label: 'SCAN_CADENCE',  value: 'EVERY_4H',      color: '#39FF14' },
-            { label: 'REMEDIATION',   value: '$299 CAD',      color: '#39FF14' },
-            { label: 'DELIVERY_SLA',  value: '5_BIZ_DAYS',    color: '#4A9EFF' },
+            { label: 'SECTEUR',        value: 'MONTRÉAL_QC',   color: '#4A9EFF' },
+            { label: 'RÉGLEMENTATION', value: 'LOI_25 / C-11', color: '#FFB830' },
+            { label: 'CADENCE',       value: 'CHAQUE_4H',      color: '#39FF14' },
+            { label: 'REMÉDIATION',   value: '299 $ CAD',      color: '#39FF14' },
+            { label: 'DÉLAI_SLA',     value: '5_JOURS_OUV',    color: '#4A9EFF' },
           ].map(({ label, value, color }) => (
             <div key={label} className="flex items-center gap-2 shrink-0">
               <span className="text-[8px] tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.25)' }}>{label}</span>
@@ -198,7 +198,7 @@ export function LandingClient({ locale }: LandingClientProps) {
           ))}
           <div className="flex items-center gap-2 shrink-0 ml-auto">
             <PulsingDot color="#39FF14" />
-            <span className="text-[9px] font-bold tracking-widest" style={{ color: '#39FF14' }}>AUTONOMOUS</span>
+            <span className="text-[9px] font-bold tracking-widest" style={{ color: '#39FF14' }}>AUTONOME</span>
           </div>
         </div>
       </div>
@@ -207,30 +207,30 @@ export function LandingClient({ locale }: LandingClientProps) {
       <section className="py-24" style={GRID_STYLE}>
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-16">
-            <p className="text-[9px] tracking-[0.3em] uppercase mb-3" style={{ color: '#4A9EFF' }}>SOVEREIGN LOOP PROTOCOL</p>
-            <h2 className="text-3xl font-black tracking-tighter">THREE STEPS TO REVENUE</h2>
+            <p className="text-[9px] tracking-[0.3em] uppercase mb-3" style={{ color: '#4A9EFF' }}>PROTOCOLE DE BOUCLE SOUVERAINE</p>
+            <h2 className="text-3xl font-black tracking-tighter">TROIS ÉTAPES VERS LES REVENUS</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
                 step: '01',
                 icon: Globe,
-                title: 'SCOUT & DETECT',
-                body: 'Scout Engine autonomously scans Montréal business registries and audits each website for Loi 25 violations — missing cookie banners, unencrypted forms, undisclosed data collection.',
+                title: 'REPÉRER & DÉTECTER',
+                body: "Le moteur Scout analyse automatiquement les registres d'entreprises montréalaises et audite chaque site pour les violations de la Loi 25 — bannières de cookies manquantes, formulaires non chiffrés, collecte de données non déclarée.",
                 color: '#4A9EFF',
               },
               {
                 step: '02',
                 icon: Eye,
-                title: 'AUDIT & RANK',
-                body: 'Cyberhawk performs a deep technical audit and Conversion Catalyst scores each target by revenue potential. HIGH severity targets get prioritised for immediate outreach.',
+                title: 'AUDITER & CLASSER',
+                body: "Cyberchien effectue un audit technique approfondi et le Catalyseur de Conversion évalue chaque cible par potentiel de revenus. Les cibles de sévérité ÉLEVÉE sont priorisées pour une approche immédiate.",
                 color: '#FFB830',
               },
               {
                 step: '03',
                 icon: Crosshair,
-                title: 'STRIKE & COLLECT',
-                body: 'Strike Command generates a personalised French pitch email, staged in Gmail or WhatsApp in one click. Client pays the $299 CAD Stripe invoice. Revenue logged automatically.',
+                title: 'FRAPPER & ENCAISSER',
+                body: "La Commande de Frappe génère un courriel de prospection personnalisé en français, préparé dans Gmail ou WhatsApp en un clic. Le client paie la facture Stripe de 299 $ CAD. Revenus enregistrés automatiquement.",
                 color: '#39FF14',
               },
             ].map(({ step, icon: Icon, title, body, color }) => (
@@ -254,43 +254,43 @@ export function LandingClient({ locale }: LandingClientProps) {
       <section className="py-24" style={{ background: 'linear-gradient(180deg, transparent, rgba(74,158,255,0.03), transparent)' }}>
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-16">
-            <p className="text-[9px] tracking-[0.3em] uppercase mb-3" style={{ color: '#4A9EFF' }}>FLEET PODS</p>
-            <h2 className="text-3xl font-black tracking-tighter">THE ENGINE ROOM</h2>
+            <p className="text-[9px] tracking-[0.3em] uppercase mb-3" style={{ color: '#4A9EFF' }}>MODULES DE FLOTTE</p>
+            <h2 className="text-3xl font-black tracking-tighter">LA SALLE DES MACHINES</h2>
           </div>
           <div className="grid md:grid-cols-2 gap-5">
             {[
               {
-                name: 'SCOUT ENGINE',
-                tag: 'CORE POD',
-                desc: 'Autonomous business registry crawler targeting Montréal SMBs. Discovers, profiles, and scores each prospect against Loi 25 compliance criteria. Runs on pg_cron every 4 hours without any human input.',
-                metrics: [['SCAN CADENCE', '4h AUTO'], ['TARGET POOL', 'MTL SMB'], ['OUTPUT', 'STRIKES']],
+                name: 'MOTEUR SCOUT',
+                tag: 'MODULE PRINCIPAL',
+                desc: "Robot d'exploration autonome ciblant les PME montréalaises. Découvre, profile et évalue chaque prospect selon les critères de conformité Loi 25. Fonctionne via pg_cron toutes les 4 heures sans intervention humaine.",
+                metrics: [['CADENCE', '4h AUTO'], ['CIBLES', 'PME MTL'], ['SORTIE', 'FRAPPES']],
                 color: '#FFB830',
                 icon: Radio,
                 href: `/${locale}/core/hub`,
               },
               {
-                name: 'CYBERHAWK',
-                tag: 'AUDIT POD',
-                desc: 'Deep technical audit engine. Reads live page source, identifies missing privacy policies, cookie consent banners, unencrypted inputs, and third-party trackers. Produces a structured Loi 25 gap report.',
-                metrics: [['AUDIT TYPE', 'LOI 25'], ['TECH STACK', 'DETECTED'], ['REPORT', 'AUTO-GEN']],
+                name: 'CYBERCHIEN',
+                tag: "MODULE D'AUDIT",
+                desc: "Moteur d'audit technique approfondi. Lit le code source en direct, identifie les politiques de confidentialité manquantes, bannières de cookies, entrées non chiffrées et traqueurs tiers. Produit un rapport structuré de lacunes Loi 25.",
+                metrics: [['AUDIT', 'LOI 25'], ['STACK', 'DÉTECTÉE'], ['RAPPORT', 'AUTO-GÉN']],
                 color: '#4A9EFF',
                 icon: Eye,
-                href: `/${locale}/pods/cyberhawk`,
+                href: `/${locale}/pods/cyberchien`,
               },
               {
-                name: 'CONVERSION CATALYST',
-                tag: 'REVENUE POD',
-                desc: 'Revenue optimization auditor that detects friction in checkout flows, missing trust signals, and conversion leaks. Cross-sells the full compliance package to prospects already inside the funnel.',
-                metrics: [['FOCUS', 'CHECKOUT'], ['UPSELL', 'ENABLED'], ['ROI TARGET', '>4x']],
+                name: 'CATALYSEUR DE CONVERSION',
+                tag: 'MODULE REVENUS',
+                desc: "Auditeur d'optimisation des revenus qui détecte les frictions dans les parcours d'achat, les signaux de confiance manquants et les fuites de conversion. Vente croisée du forfait complet de conformité.",
+                metrics: [['FOCUS', 'PAIEMENT'], ['VENTE+', 'ACTIVÉE'], ['ROI CIBLE', '>4x']],
                 color: '#39FF14',
                 icon: TrendingUp,
                 href: `/${locale}/pods/conversion-catalyst`,
               },
               {
-                name: 'STRIKE COMMAND',
-                tag: 'OUTREACH POD',
-                desc: 'One-click outreach execution. Generates bilingual (EN/FR) personalized emails leveraging Loi 25 urgency, stages them in Gmail, opens WhatsApp templates, and fires Stripe invoices directly from the HUD.',
-                metrics: [['LANGUAGE', 'FR / EN'], ['CHANNEL', 'EMAIL+WA'], ['INVOICE', '$299 CAD']],
+                name: 'COMMANDE DE FRAPPE',
+                tag: 'MODULE PROSPECTION',
+                desc: "Exécution de prospection en un clic. Génère des courriels personnalisés bilingues (FR/EN) exploitant l'urgence de la Loi 25, les prépare dans Gmail, ouvre les modèles WhatsApp et envoie les factures Stripe directement depuis le HUD.",
+                metrics: [['LANGUE', 'FR / EN'], ['CANAL', 'COURRIEL+WA'], ['FACTURE', '299 $ CAD']],
                 color: '#FF3B3B',
                 icon: Crosshair,
                 href: `/${locale}/core/strike`,
@@ -334,22 +334,22 @@ export function LandingClient({ locale }: LandingClientProps) {
           <div className="rounded-2xl p-8 md:p-12" style={{ background: 'linear-gradient(135deg, #0e1a2e, #091422)', border: '1px solid rgba(74,158,255,0.15)', boxShadow: '0 0 80px rgba(74,158,255,0.08)' }}>
             <div className="grid md:grid-cols-2 gap-10 items-center">
               <div>
-                <p className="text-[9px] tracking-[0.3em] uppercase mb-3" style={{ color: '#4A9EFF' }}>INTELLIGENCE BRIEF</p>
-                <h2 className="text-2xl font-black tracking-tighter mb-4">QUÉBEC LOI 25 —<br />THE $25M OPPORTUNITY</h2>
+                <p className="text-[9px] tracking-[0.3em] uppercase mb-3" style={{ color: '#4A9EFF' }}>BULLETIN DE RENSEIGNEMENT</p>
+                <h2 className="text-2xl font-black tracking-tighter mb-4">LOI 25 DU QUÉBEC —<br />L'OPPORTUNITÉ DE 25 M$</h2>
                 <p className="text-[11px] leading-relaxed mb-6" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                  As of September 2023, Québec's Law 25 (Bill 64) is fully in force. Thousands of Montréal SMBs are non-compliant — exposed to fines up to $25M or 4% of worldwide revenue. Most haven't even started.
+                  Depuis septembre 2023, la Loi 25 du Québec (projet de loi 64) est pleinement en vigueur. Des milliers de PME montréalaises sont non conformes — exposées à des amendes allant jusqu'à 25 M$ ou 4 % du chiffre d'affaires mondial. La plupart n'ont même pas commencé.
                 </p>
                 <p className="text-[11px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                  Colony OS automates the entire prospecting pipeline. Find the gap, pitch the fix, collect the fee — all without leaving the HUD.
+                  Colonie OS automatise l'ensemble du pipeline de prospection. Trouver la lacune, proposer la solution, encaisser les frais — le tout sans quitter le HUD.
                 </p>
               </div>
               <div className="space-y-3">
                 {[
-                  { label: 'Max fine per violation',    value: '$25,000,000',   color: '#FF3B3B' },
-                  { label: 'Alternative (% of revenue)', value: '4% worldwide', color: '#FFB830' },
-                  { label: 'SMBs estimated non-compliant', value: '>60%',       color: '#FFB830' },
-                  { label: 'Average remediation ticket',  value: '$299 CAD',    color: '#39FF14' },
-                  { label: 'Colony OS strike rate',       value: 'Automated',   color: '#4A9EFF' },
+                  { label: 'Amende max par infraction',    value: '25 000 000 $',   color: '#FF3B3B' },
+                  { label: 'Alternative (% du CA)',       value: '4 % mondial',   color: '#FFB830' },
+                  { label: 'PME estimées non conformes',  value: '>60 %',         color: '#FFB830' },
+                  { label: 'Ticket moyen de remédiation', value: '299 $ CAD',     color: '#39FF14' },
+                  { label: 'Taux de frappe Colonie OS',   value: 'Automatisé',    color: '#4A9EFF' },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="flex items-center justify-between px-4 py-2.5 rounded-xl"
                     style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
@@ -367,19 +367,19 @@ export function LandingClient({ locale }: LandingClientProps) {
       <section className="py-20" style={GRID_STYLE}>
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-12">
-            <p className="text-[9px] tracking-[0.3em] uppercase mb-3" style={{ color: '#4A9EFF' }}>TECHNICAL ARSENAL</p>
-            <h2 className="text-3xl font-black tracking-tighter">BUILT ON SOVEREIGN INFRASTRUCTURE</h2>
+            <p className="text-[9px] tracking-[0.3em] uppercase mb-3" style={{ color: '#4A9EFF' }}>ARSENAL TECHNIQUE</p>
+            <h2 className="text-3xl font-black tracking-tighter">BÂTI SUR UNE INFRASTRUCTURE SOUVERAINE</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { name: 'Supabase Realtime', desc: 'Live radar updates', icon: Activity, color: '#39FF14' },
-              { name: 'pg_cron + pg_net',  desc: 'Autonomous scans',   icon: Radio,    color: '#4A9EFF' },
-              { name: 'Stripe Checkout',   desc: '$299 invoices',       icon: Lock,     color: '#FFB830' },
-              { name: 'Next.js 13',        desc: 'i18n · FR · EN',      icon: Globe,    color: '#4A9EFF' },
-              { name: 'Edge Functions',    desc: 'Deno · serverless',   icon: Zap,      color: '#39FF14' },
-              { name: 'Vector Search',     desc: 'Arsenal AI engine',   icon: BarChart3, color: '#FF3B3B' },
-              { name: 'Discord Bridge',    desc: 'Real-time alerts',    icon: Shield,   color: '#4A9EFF' },
-              { name: 'pgvector',          desc: 'Semantic matching',   icon: TrendingUp, color: '#FFB830' },
+              { name: 'Supabase Realtime', desc: 'Mises à jour radar en direct', icon: Activity, color: '#39FF14' },
+              { name: 'pg_cron + pg_net',  desc: 'Analyses autonomes',        icon: Radio,    color: '#4A9EFF' },
+              { name: 'Stripe Checkout',   desc: 'Factures 299 $',            icon: Lock,     color: '#FFB830' },
+              { name: 'Next.js 13',        desc: 'i18n · FR · EN',            icon: Globe,    color: '#4A9EFF' },
+              { name: 'Edge Functions',    desc: 'Deno · sans serveur',       icon: Zap,      color: '#39FF14' },
+              { name: 'Recherche vectorielle', desc: 'Moteur IA Arsenal',     icon: BarChart3, color: '#FF3B3B' },
+              { name: 'Pont Discord',      desc: 'Alertes en temps réel',     icon: Shield,   color: '#4A9EFF' },
+              { name: 'pgvector',          desc: 'Correspondance sémantique', icon: TrendingUp, color: '#FFB830' },
             ].map(({ name, desc, icon: Icon, color }) => (
               <div key={name} className="rounded-xl p-4 transition-all hover:scale-[1.02]"
                 style={{ background: 'linear-gradient(160deg, #111820 0%, #0d1117 100%)', border: `1px solid ${color}12` }}>
@@ -401,29 +401,29 @@ export function LandingClient({ locale }: LandingClientProps) {
             <div className="relative">
               <div className="flex items-center justify-center gap-2 mb-6">
                 <PulsingDot color="#39FF14" />
-                <span className="text-[9px] tracking-[0.25em] uppercase" style={{ color: '#39FF14' }}>SYSTEMS OPERATIONAL</span>
+                <span className="text-[9px] tracking-[0.25em] uppercase" style={{ color: '#39FF14' }}>SYSTÈMES OPÉRATIONNELS</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-4">
-                READY TO MONETIZE<br />
+                PRÊT À MONÉTISER<br />
                 <span style={{ background: 'linear-gradient(135deg, #4A9EFF, #39FF14)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                  QUÉBEC'S COMPLIANCE GAP?
+                  L'ÉCART DE CONFORMITÉ DU QUÉBEC?
                 </span>
               </h2>
               <p className="text-[11px] mb-10 max-w-lg mx-auto leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                Create your account, connect your Stripe, and let the Sovereign Loop run. The Scout Engine has already identified targets. Your first strike is one click away.
+                Créez votre compte, connectez votre Stripe, et laissez la Boucle Souveraine tourner. Le Moteur Scout a déjà identifié des cibles. Votre première frappe est à un clic.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href={loginHref}
                   className="group flex items-center gap-3 px-8 py-4 rounded-xl text-sm font-bold tracking-widest uppercase transition-all hover:scale-105"
                   style={{ background: 'linear-gradient(135deg, #0d2040, #1a4a8a)', border: '1px solid rgba(74,158,255,0.5)', color: '#4A9EFF', boxShadow: '0 0 32px rgba(74,158,255,0.25)' }}>
-                  GET STARTED FREE
+                  COMMENCER GRATUITEMENT
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </Link>
                 <Link href={hubHref}
                   className="flex items-center gap-2 px-6 py-4 rounded-xl text-sm font-bold tracking-widest uppercase transition-all hover:opacity-80"
                   style={{ border: '1px solid rgba(57,255,20,0.25)', color: '#39FF14' }}>
                   <Radio className="w-4 h-4" />
-                  LIVE DEMO
+                  DÉMO EN DIRECT
                 </Link>
               </div>
             </div>
@@ -439,13 +439,13 @@ export function LandingClient({ locale }: LandingClientProps) {
               <Radio className="w-3 h-3" style={{ color: '#4A9EFF' }} />
             </div>
             <span className="text-[10px] tracking-tighter font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>COLONY_OS</span>
-            <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>// SOVEREIGN LOOP v2.0</span>
+            <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>// BOUCLE SOUVERAINE v2.0</span>
           </div>
           <p className="text-[9px] tracking-wider" style={{ color: 'rgba(255,255,255,0.2)' }}>
-            SECTOR: MONTRÉAL_QC · REGULATION: LOI_25 · ALL SYSTEMS NOMINAL
+            SECTEUR : MONTRÉAL_QC · RÉGLEMENTATION : LOI_25 · TOUS SYSTÈMES NOMINAUX
           </p>
           <div className="flex items-center gap-4">
-            <Link href={loginHref} className="text-[9px] tracking-widest" style={{ color: 'rgba(255,255,255,0.25)' }}>LOGIN</Link>
+            <Link href={loginHref} className="text-[9px] tracking-widest" style={{ color: 'rgba(255,255,255,0.25)' }}>CONNEXION</Link>
             <Link href={hubHref}   className="text-[9px] tracking-widest" style={{ color: 'rgba(255,255,255,0.25)' }}>HUB</Link>
           </div>
         </div>

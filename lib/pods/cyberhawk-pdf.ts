@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 
-export interface CyberhawkScanResult {
+export interface CyberchienScanResult {
   url: string;
   threatLevel: 'Critical' | 'High' | 'Medium' | 'Low';
   score: number;
@@ -25,7 +25,7 @@ const SEVERITY_HEX: Record<string, [number, number, number]> = {
   Low: [57, 255, 20],
 };
 
-export async function generateGoldenTicket(result: CyberhawkScanResult) {
+export async function generateGoldenTicket(result: CyberchienScanResult) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const W = 210;
   const H = 297;
@@ -47,7 +47,7 @@ export async function generateGoldenTicket(result: CyberhawkScanResult) {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(22);
   doc.setTextColor(255, 255, 255);
-  doc.text('CYBERHAWK', 12, 18);
+  doc.text('CYBERCHIEN', 12, 18);
 
   doc.setFontSize(9);
   doc.setTextColor(74, 158, 255);
@@ -207,9 +207,9 @@ export async function generateGoldenTicket(result: CyberhawkScanResult) {
   doc.setFontSize(7);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(50, 70, 110);
-  doc.text('COLONY OS — CYBERHAWK POD — CONFIDENTIAL', 12, H - 6);
+  doc.text('COLONY OS — CYBERCHIEN POD — CONFIDENTIAL', 12, H - 6);
   doc.text(`Generated ${new Date().toLocaleString('en-CA')}`, W - 12, H - 6, { align: 'right' });
 
-  const filename = `cyberhawk-golden-ticket-${Date.now()}.pdf`;
+  const filename = `cyberchien-ticket-or-${Date.now()}.pdf`;
   doc.save(filename);
 }

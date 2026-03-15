@@ -67,6 +67,20 @@
       "coreVitals": "Core Vitals",
       "conversionArch": "Conversion Architecture",
       "seoSurface": "SEO Surface"
+    },
+    "cyberchien": {
+      "title": "Cyberchien",
+      "description": "Talon HUD Security Scanner",
+      "launchScan": "Launch Talon Scan",
+      "newScan": "New Scan",
+      "scanCapabilities": "Scan Capabilities",
+      "detectedStack": "Detected Stack",
+      "threatLevel": "Threat Level",
+      "findings": "findings",
+      "riskExposure": "risk exposure",
+      "goldenTicket": "Golden Ticket Report",
+      "generating": "Generating...",
+      "scanFailed": "Scan failed — check target URL"
     }
   },
   "dashboard": {

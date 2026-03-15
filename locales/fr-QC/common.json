@@ -51,7 +51,7 @@
   },
   "app": {
     "title": "Colonie OS",
-    "description": "Une interface de système d'exploitation skeuomorphique"
+    "description": "Plateforme autonome de récupération de revenus de conformité"
   },
   "pod": {
     "conversionCatalyst": {
@@ -67,6 +67,20 @@
       "coreVitals": "Métriques principales",
       "conversionArch": "Architecture de conversion",
       "seoSurface": "Surface SEO"
+    },
+    "cyberchien": {
+      "title": "Cyberchien",
+      "description": "Scanner de sécurité Talon HUD",
+      "launchScan": "Lancer l'analyse Talon",
+      "newScan": "Nouvelle analyse",
+      "scanCapabilities": "Capacités d'analyse",
+      "detectedStack": "Stack détectée",
+      "threatLevel": "Niveau de menace",
+      "findings": "trouvailles",
+      "riskExposure": "exposition au risque",
+      "goldenTicket": "Rapport Ticket d'Or",
+      "generating": "Génération...",
+      "scanFailed": "Échec de l'analyse — vérifiez l'URL cible"
     }
   },
   "dashboard": {

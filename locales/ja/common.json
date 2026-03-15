@@ -67,6 +67,20 @@
       "coreVitals": "コアバイタル",
       "conversionArch": "コンバージョン設計",
       "seoSurface": "SEO表面積"
+    },
+    "cyberchien": {
+      "title": "Cyberchien",
+      "description": "Talon HUDセキュリティスキャナー",
+      "launchScan": "Talonスキャン開始",
+      "newScan": "新しいスキャン",
+      "scanCapabilities": "スキャン機能",
+      "detectedStack": "検出されたスタック",
+      "threatLevel": "脅威レベル",
+      "findings": "発見事項",
+      "riskExposure": "リスク露出",
+      "goldenTicket": "ゴールデンチケットレポート",
+      "generating": "生成中...",
+      "scanFailed": "スキャン失敗 — URLを確認してください"
     }
   },
   "dashboard": {

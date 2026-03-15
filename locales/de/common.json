@@ -67,6 +67,20 @@
       "coreVitals": "Kern-Metriken",
       "conversionArch": "Konversionsarchitektur",
       "seoSurface": "SEO-Oberfläche"
+    },
+    "cyberchien": {
+      "title": "Cyberchien",
+      "description": "Talon HUD Sicherheitsscanner",
+      "launchScan": "Talon-Scan starten",
+      "newScan": "Neuer Scan",
+      "scanCapabilities": "Scan-Fähigkeiten",
+      "detectedStack": "Erkannter Stack",
+      "threatLevel": "Bedrohungsstufe",
+      "findings": "Befunde",
+      "riskExposure": "Risikoexposition",
+      "goldenTicket": "Golden Ticket Bericht",
+      "generating": "Wird generiert...",
+      "scanFailed": "Scan fehlgeschlagen — URL prüfen"
     }
   },
   "dashboard": {

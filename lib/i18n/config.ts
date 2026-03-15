@@ -1,7 +1,7 @@
 export type Locale = 'en-CA' | 'fr-QC' | 'es' | 'de' | 'ja';
 
-export const locales: Locale[] = ['en-CA', 'fr-QC', 'es', 'de', 'ja'];
-export const defaultLocale: Locale = 'en-CA';
+export const locales: Locale[] = ['fr-QC', 'en-CA', 'es', 'de', 'ja'];
+export const defaultLocale: Locale = 'fr-QC';
 
 export const localeNames: Record<Locale, string> = {
   'en-CA': 'English',

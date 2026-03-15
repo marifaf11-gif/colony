@@ -1,6 +1,6 @@
-export type CyberhawkStep = 'idle' | 'dns' | 'ports' | 'headers' | 'tech' | 'complete';
+export type CyberchienStep = 'idle' | 'dns' | 'ports' | 'headers' | 'tech' | 'complete';
 
-export interface CyberhawkFinding {
+export interface CyberchienFinding {
   id: string;
   category: string;
   title: string;
@@ -9,18 +9,18 @@ export interface CyberhawkFinding {
   cve?: string;
 }
 
-export interface CyberhawkResult {
+export interface CyberchienResult {
   url: string;
   threatLevel: 'Critical' | 'High' | 'Medium' | 'Low';
   score: number;
-  findings: CyberhawkFinding[];
+  findings: CyberchienFinding[];
   technologies: string[];
   totalRisk: number;
   scannedAt: string;
   detectedLanguage: string;
 }
 
-const FINDINGS_BANK: CyberhawkFinding[] = [
+const FINDINGS_BANK: CyberchienFinding[] = [
   {
     id: 'xss-csp',
     category: 'Headers',
@@ -135,7 +135,7 @@ function detectLanguage(url: string): string {
   return 'en';
 }
 
-function computeThreatLevel(findings: CyberhawkFinding[]): { level: 'Critical' | 'High' | 'Medium' | 'Low'; score: number } {
+function computeThreatLevel(findings: CyberchienFinding[]): { level: 'Critical' | 'High' | 'Medium' | 'Low'; score: number } {
   const hasCritical = findings.some((f) => f.severity === 'Critical');
   const highCount = findings.filter((f) => f.severity === 'High').length;
   if (hasCritical) return { level: 'Critical', score: rand(15, 38) };
@@ -144,10 +144,10 @@ function computeThreatLevel(findings: CyberhawkFinding[]): { level: 'Critical' |
   return { level: 'Low', score: rand(72, 90) };
 }
 
-export async function runCyberhawkScan(
+export async function runCyberchienScan(
   url: string,
-  onStep: (step: CyberhawkStep) => void
-): Promise<CyberhawkResult> {
+  onStep: (step: CyberchienStep) => void
+): Promise<CyberchienResult> {
   onStep('dns');
   await sleep(rand(1200, 1800));
 
